@@ -10,7 +10,7 @@ const trendings = `${apiBaseURL}/trending/movie/day?language=vi&language=en-US&a
 const upcomings = `${apiBaseURL}/movie/upcoming?language=vi&language=en-US&api_key=${API_KEY}`;
 const topRateds = `${apiBaseURL}/movie/top_rated?language=vi&language=en-US&api_key=${API_KEY}`;
 
-// Chi tiet phim
+// tạo biến xem thông tin chi tiết phim
 const movieDetails = (id) =>
   `${apiBaseURL}/movie/${id}?language=vi&api_key=${API_KEY}`;
 const movieCredits = (id) =>
