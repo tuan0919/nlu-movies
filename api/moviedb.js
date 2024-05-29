@@ -25,6 +25,10 @@ const personDetails = (id) =>
 const personMovies = (id) =>
   `${apiBaseURL}/person/${id}/movie_credits?language=vi&language=en-US&api_key=${API_KEY}`;
 
+// binh luan
+const reviewMovies = (id) =>
+    `${apiBaseURL}/movie/${id}/reviews_movies?language=vi&language=en-US&api_key=${API_KEY}`;
+
 export const fetchImage500 = (path) =>
   path ? `https://image.tmdb.org/t/p/w500${path}` : null;
 export const fetchImage342 = (path) =>
@@ -72,6 +76,9 @@ export const fetchPersonDetails = (id) => {
 };
 export const fetchPersonMovies = (id) => {
   return apiCall(personMovies(id));
+};
+export const fetchReviewMovies = (id) => {
+  return apiCall(reviewMovies(id));
 };
 export const fetchSearchMovies = (params) => {
   return apiCall(movieSearch, params);
