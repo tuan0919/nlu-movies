@@ -79,6 +79,7 @@ export function MovieScreen() {
     return data?.metacritic?.metascore?.score;
   };
 
+  // Them tinh nang binh luan phim
   const loadReviewsMovie = async (id) => {
     const data = await fetchReviewMovies(id);
     if (data && data.results) setReviews(data.results);
