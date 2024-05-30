@@ -17,8 +17,9 @@ var { width, height } = Dimensions.get("window");
 export default function SeeAllScreen() {
   const {
     params: { data: movies, title },
-  } = useRoute();
+  } = useRoute(); // 4.1.3 lấy ra data đc navigator chuyển đến screen này
   const navigation = useNavigation();
+  // 4.1.4 return ScrollView
   return (
     <ScrollView className="bg-neutral-800 flex-1">
       <SafeAreaView
@@ -29,8 +30,10 @@ export default function SeeAllScreen() {
         }}
       >
         <TouchableOpacity
+        // 4.2.1. Bấm vào biểu tượng quay lại
           className="rounded-xl p-1"
           style={styles.background}
+          // 4.2.2
           onPress={() => navigation.goBack()}
         >
           <ChevronLeftIcon size="28" strokeWidth={2.5} color="white" />

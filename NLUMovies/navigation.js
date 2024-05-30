@@ -9,6 +9,7 @@ import SearchScreen from "./screens/SearchScreen";
 import SeeAllScreen from "./screens/SeeAllScreen";
 
 export default function Navigation() {
+  // Navigation, dùng để chuyển hướng các screen của người dùng
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -16,6 +17,7 @@ export default function Navigation() {
           headerShown: false,
         }}
       >
+        {/* 2. set HomeScreen làm screen mặc định (navigator sẽ load screen này đầu tiên) */}
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Movie" component={MovieScreen} />
         <Stack.Screen name="Person" component={PersonScreen} />

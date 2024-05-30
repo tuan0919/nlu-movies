@@ -20,6 +20,7 @@ export default function MovieList({ title, data, hideSeeAll }) {
         <Text className="text-white text-xl px-3">{title}</Text>
         {!hideSeeAll && (
           <TouchableOpacity
+          // 4.1.1 Nếu người dùng bấm vào nút "Xem Tất cả", chuyển đến đến See All Screen
             onPress={() => navigation.push("See All", { data, title: title })}
           >
             <Text style={styles.text} className="text-lg px-3">

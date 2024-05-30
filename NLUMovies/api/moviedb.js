@@ -46,14 +46,17 @@ const apiCall = async (endpoints, params) => {
   } catch (error) {}
 };
 
+// 3.1.1
 export const fetchTrendingMovies = () => {
-  return apiCall(trendings);
+  return apiCall(trendings); // 3.1.2
 };
+// 3.2.1
 export const fetchUpcomingMovies = () => {
-  return apiCall(upcomings);
+  return apiCall(upcomings); // 3.2.2
 };
+// 3.3.1
 export const fetchTopRatedMovies = () => {
-  return apiCall(topRateds);
+  return apiCall(topRateds); // 3.3.2
 };
 export const fetchMovieDetails = (id) => {
   return apiCall(movieDetails(id));

@@ -24,7 +24,7 @@ import {
 } from "../api/moviedb";
 const ios = Platform.OS === "ios";
 export function HomeScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation(); // Navigation
   const [trending, setTrending] = useState([]);
   const [upcoming, setUpcoming] = useState([]);
   const [topRated, setTopRated] = useState([]);
@@ -32,26 +32,43 @@ export function HomeScreen() {
   const startLoading = () => {
     setLoading(true);
     const fetching = async () => {
+      // 3.1. Load Trending Movies
       await loadTrendingMovies();
+      // 3.2. Load Upcoming Movies
       await loadUpcomingMovies();
+      // 3.3. Load Top Rated Movies
       await loadTopRatedMovies();
       setLoading(false);
     };
     fetching();
   };
-  useEffect(startLoading, []);
   const loadTrendingMovies = async function () {
-    const data = await fetchTrendingMovies();
+    // request lên TMDB Server để fetch thông tin phim trending
+    // Nếu kết quả hợp lệ, cập nhật lại state trending bằng kết quả vừa nhận được
+    // Việc cập nhật state trending khiến cho component TrendingMovies chứa nó tự động re-render giao diện
+    const data = await fetchTrendingMovies(); // 3.1.2 -> 3.1.6
+    // 3.1.7
     if (data && data.results) setTrending(data.results);
   };
   const loadUpcomingMovies = async function () {
-    const data = await fetchUpcomingMovies();
+    // request lên TMDB Server để fetch thông tin phim upcoming
+    // Nếu kết quả hợp lệ, cập nhật lại state upcoming bằng kết quả vừa nhận được
+    // Việc cập nhật state upcoming khiến cho component MoviesList chứa nó tự động re-render giao diện
+    const data = await fetchUpcomingMovies(); //3.2.2 -> 3.2.6
+    // 3.2.7
     if (data && data.results) setUpcoming(data.results);
   };
   const loadTopRatedMovies = async function () {
-    const data = await fetchTopRatedMovies();
+    // request lên TMDB Server để fetch thông tin phim top rated
+    // Nếu kết quả hợp lệ, cập nhật lại state topRated bằng kết quả vừa nhận được
+    // Việc cập nhật state topRated khiến cho component MoviesList chứa nó tự động re-render giao diện
+    const data = await fetchTopRatedMovies(); //3.3.2 -> 3.3.6
+    //3.3.7
     if (data && data.results) setTopRated(data.results);
   };
+  // 3. Tự động gọi hàm startLoading sau khi load component này
+  useEffect(startLoading, []);
+  // 4. Sau khi có được hết dữ liệu thì return component View
   return (
     <View className="flex-1 bg-neutral-800">
       <SafeAreaView>
