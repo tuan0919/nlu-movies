@@ -39,6 +39,10 @@ export default function PersonScreen() {
     };
     fetch();
   }, [item]);
+
+  // Hàm LoadPersonDetails sử dụng getPersonDetails để tìm nạp chi tiết diễn viên từ API.
+  // Nó chờ phản hồi API, cập nhật trạng thái với dữ liệu được
+  // tìm nạp nếu có và sau đó trả về dữ liệu.
   const loadPersonDetails = async function (id) {
     const data = await fetchPersonDetails(id);
     if (data) setPerson(data);

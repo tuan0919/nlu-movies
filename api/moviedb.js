@@ -10,7 +10,10 @@ const trendings = `${apiBaseURL}/trending/movie/day?language=vi&language=en-US&a
 const upcomings = `${apiBaseURL}/movie/upcoming?language=vi&language=en-US&api_key=${API_KEY}`;
 const topRateds = `${apiBaseURL}/movie/top_rated?language=vi&language=en-US&api_key=${API_KEY}`;
 
-// Chi tiet phim
+// tạo biến chi tiết phim
+// Hàm movieDetails xây dựng URL cần thiết để tìm ghi
+// công của một bộ phim cụ thể theo ID của nó.
+//    URL này bao gồm ID phim, thông số ngôn ngữ và khóa API.
 const movieDetails = (id) =>
   `${apiBaseURL}/movie/${id}?language=vi&api_key=${API_KEY}`;
 const movieCredits = (id) =>
@@ -20,6 +23,9 @@ const movieSimilars = (id) =>
 const movieSearch = `${apiBaseURL}/search/movie?language=vi&api_key=${API_KEY}`;
 
 // Chi tiet thong tin dien vien
+// Hàm personDetails xây dựng URL cần thiết để tìm ghi
+// công của một bộ phim cụ thể theo ID của nó.
+//    URL này bao gồm ID diễn viên, thông số ngôn ngữ và khóa API.
 const personDetails = (id) =>
   `${apiBaseURL}/person/${id}?language=en-US&api_key=${API_KEY}`;
 const personMovies = (id) =>
@@ -62,6 +68,10 @@ export const fetchUpcomingMovies = () => {
 export const fetchTopRatedMovies = () => {
   return apiCall(topRateds);
 };
+
+// Nó gọi apiCall, chuyển kết quả của movieDetails(id) làm đối số của nó.
+//     Hàm movieDetails(id) tạo URL cần thiết để tìm nạp chi tiết phim.
+//     Hàm apiCall dự kiến sẽ xử lý lệnh gọi API thực tế tới URL này và trả về kết quả.
 export const fetchMovieDetails = (id) => {
   return apiCall(movieDetails(id));
 };
@@ -71,6 +81,10 @@ export const fetchMovieCredits = (id) => {
 export const fetchMovieSimilars = (id) => {
   return apiCall(movieSimilars(id));
 };
+
+// Nó gọi apiCall, chuyển kết quả của personDetails(id) làm đối số của nó.
+//     Hàm personDetails(id) tạo URL cần thiết để tìm nạp chi tiết phim.
+//     Hàm apiCall dự kiến sẽ xử lý lệnh gọi API thực tế tới URL này và trả về kết quả.
 export const fetchPersonDetails = (id) => {
   return apiCall(personDetails(id));
 };

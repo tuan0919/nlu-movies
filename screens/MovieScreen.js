@@ -56,6 +56,10 @@ export function MovieScreen() {
     };
     fetching();
   }, [item]);
+
+  // Hàm LoadDetailsMovie sử dụng getMovieDetails để tìm nạp chi tiết phim từ API.
+  // Nó chờ phản hồi API, cập nhật trạng thái với dữ liệu được
+  // tìm nạp nếu có và sau đó trả về dữ liệu.
   const loadDetailsMovie = async (id) => {
     const data = await fetchMovieDetails(id);
     if (data) setMovie(data);
@@ -65,10 +69,11 @@ export function MovieScreen() {
     const data = await fetchMovieCredits(id);
     if (data && data.cast) setCast(data.cast);
   };
+
   const loadSimilarsMovie = async (id) => {
     const data = await fetchMovieSimilars(id);
     if (data && data.results) setSimilarMovies(data.results);
-  };
+    };
   const loadIMDB = async (idmb_id) => {
     const data = await fetchMovieIMDB(idmb_id);
     return data?.metacritic?.metascore?.score;
@@ -136,7 +141,6 @@ export function MovieScreen() {
                           alignItems: "center",
                           justifyContent: "center",
                           flexDirection: "row",
-                          alignItems: "center",
                           width: "100%",
                           height: "100%",
                           gap: 60,
