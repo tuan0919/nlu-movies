@@ -10,10 +10,14 @@ const trendings = `${apiBaseURL}/trending/movie/day?language=vi&language=en-US&a
 const upcomings = `${apiBaseURL}/movie/upcoming?language=vi&language=en-US&api_key=${API_KEY}`;
 const topRateds = `${apiBaseURL}/movie/top_rated?language=vi&language=en-US&api_key=${API_KEY}`;
 
+<<<<<<< HEAD
 // tạo biến chi tiết phim
 // Hàm movieDetails xây dựng URL cần thiết để tìm ghi
 // công của một bộ phim cụ thể theo ID của nó.
 //    URL này bao gồm ID phim, thông số ngôn ngữ và khóa API.
+=======
+// tạo biến xem thông tin chi tiết phim
+>>>>>>> 2cfb7e02268da41ef1b7a5a85c84ce08df51dde0
 const movieDetails = (id) =>
   `${apiBaseURL}/movie/${id}?language=vi&api_key=${API_KEY}`;
 const movieCredits = (id) =>
