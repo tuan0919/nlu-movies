@@ -1,8 +1,15 @@
 import { View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
 import React from "react";
+import { Cast } from "../model/Cast";
 import { fallbackPersonImage, fetchImage185 } from "../api/moviedb";
+import { NavigationProp } from "@react-navigation/native";
 
-export default function Cast({ cast, navigation }) {
+type CastProps = {
+  cast: Cast[];
+  navigation: NavigationProp<any>;
+};
+
+export default function CastComponent({ cast, navigation }: CastProps): JSX.Element {
   return (
     <View className="my-6">
       <Text className="text-white text-lg mx-4 mb-5">Diễn viên</Text>

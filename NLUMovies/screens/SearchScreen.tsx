@@ -20,11 +20,14 @@ import {
   fetchImage185,
   fetchSearchMovies,
 } from "../api/moviedb";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../navigation";
+import { Movie } from "../model/Movie";
 var { width, height } = Dimensions.get("window");
 
 export default function SearchScreen() {
-  const navigation = useNavigation();
-  const [results, setResults] = useState([]);
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [results, setResults] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
   return (
     <SafeAreaView className="bg-neutral-800 flex-1">
@@ -87,8 +90,8 @@ export default function SearchScreen() {
                       className="rounded-xl"
                       source={{
                         uri:
-                          fetchImage185(item?.poster_path) ||
-                          fallbackMoviesPoster,
+                        item?.poster_path && fetchImage185(item?.poster_path) 
+                        || fallbackMoviesPoster,
                       }}
                       style={{ width: width * 0.44, height: height * 0.3 }}
                     />

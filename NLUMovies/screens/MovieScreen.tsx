@@ -9,12 +9,12 @@ import {
   Image,
 } from "react-native";
 import React, { useState } from "react";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { NavigationProp, RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { useEffect } from "react";
 import { ChevronLeftIcon, HeartIcon } from "react-native-heroicons/outline";
 import { styles, theme, translate } from "../theme";
 import { LinearGradient } from "expo-linear-gradient";
-import Cast from "../components/Cast";
+import CastComponent from "../components/Cast";
 import MovieList from "../components/MovieList";
 import Loading from "../components/Loading";
 import {
@@ -25,45 +25,51 @@ import {
   fetchMovieIMDB,
   fetchMovieSimilars,
 } from "../api/moviedb";
+import { Cast } from "../model/Cast";
+import { Movie } from "../model/Movie";
+import { RootStackParamList } from "../navigation";
 var { width, height } = Dimensions.get("window");
 const ios = Platform.OS === "ios";
 const topMargin = ios ? "" : "mt-3";
 export function MovieScreen() {
-  const { params: item } = useRoute();
-  const navigation = useNavigation();
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [cast, setCast] = useState([]);
-  const [similarMovies, setSimilarMovies] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [movie, setMovie] = useState({});
+  const { params: item } = useRoute<RouteProp<RootStackParamList, 'Movie'>>();
+  const navigation : NavigationProp<Movie | Cast> = useNavigation();
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const [cast, setCast] = useState<Cast[]>([]);
+  const [similarMovies, setSimilarMovies] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [movie, setMovie] = useState<Movie | undefined>(undefined);
   useEffect(() => {
     setLoading(true);
     // Gọi api để lấy chi tiết thông tin phim
     const fetching = async () => {
-      const movie = await loadDetailsMovie(item.id);
+      const movie = await loadDetailsMovie(item);
       const score = await loadIMDB(movie.imdb_id);
       setMovie({ ...movie, imdb_score: score });
-      await loadCreditsMovie(item.id);
-      await loadSimilarsMovie(item.id);
+      await loadCreditsMovie(item);
+      await loadSimilarsMovie(item);
       setLoading(false);
     };
     fetching();
   }, [item]);
-  const loadDetailsMovie = async (id) => {
+  const loadDetailsMovie = async ({id} : Movie) => {
     const data = await fetchMovieDetails(id);
     if (data) setMovie(data);
     return data;
   };
-  const loadCreditsMovie = async (id) => {
+  const loadCreditsMovie = async ({id} : Movie) => {
     const data = await fetchMovieCredits(id);
     if (data && data.cast) setCast(data.cast);
   };
-  const loadSimilarsMovie = async (id) => {
+  const loadSimilarsMovie = async ({id} : Movie) => {
     const data = await fetchMovieSimilars(id);
     if (data && data.results) setSimilarMovies(data.results);
   };
-  const loadIMDB = async (idmb_id) => {
-    const data = await fetchMovieIMDB(idmb_id);
+  const loadIMDB = async ({imdb_id}: Movie) => {
+    let data = undefined;
+    if (imdb_id) {
+      data = await fetchMovieIMDB(imdb_id);
+    }
     return data?.metacritic?.metascore?.score;
   };
   return (
@@ -123,7 +129,6 @@ export function MovieScreen() {
                   alignItems: "center",
                   justifyContent: "center",
                   flexDirection: "row",
-                  alignItems: "center",
                   width: "100%",
                   height: "100%",
                   gap: 60,
@@ -142,7 +147,7 @@ export function MovieScreen() {
                   >
                     <View>
                       <Text className="text-center text-white font-bold text-base">
-                        {parseInt(movie.vote_average * 10)}%
+                        {parseInt(movie.vote_average) * 10}%
                       </Text>
                     </View>
                   </View>
@@ -198,17 +203,17 @@ export function MovieScreen() {
             <Text className="text-white text-center text-3xl font-bold tracking-wider">
               {movie?.title}
             </Text>
-            {movie.id ? (
+            {movie?.id ? (
               <Text className="text-neutral-400 font-semibold text-base text-center">
-                {translate[movie.status] || movie.status} •{" "}
-                {movie?.release_date} • {parseInt(movie.runtime / 60)} giờ{" "}
-                {movie.runtime % 60} phút
+                {movie.status && translate[movie.status as keyof typeof translate] || movie.status} •{" "}
+                {movie?.release_date} • {parseInt(movie.runtime) / 60} giờ{" "}
+                {Number(movie.runtime) % 60} phút
               </Text>
             ) : null}
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View className="flex-row justify-center mx-4">
-                {movie?.genres?.map((genre, index) => {
-                  let last = index + 1 != movie.genres.length;
+                {(movie?.genres || []).map((genre, index, arr) => {
+                  let last = index + 1 != arr.length;
                   return (
                     <Text
                       className="text-neutral-400 font-semibold text-base"
@@ -229,13 +234,13 @@ export function MovieScreen() {
             </Text>
           </View>
           {/* Diễn viên */}
-          <Cast navigation={navigation} cast={cast} />
+          <CastComponent navigation={navigation} cast={cast} />
           {/* Phim cùng thể loại */}
           <View className="mt-6">
             <MovieList
               title={"Phim cùng thể loại"}
               hideSeeAll={true}
-              data={similarMovies}
+              movies={similarMovies}
             />
           </View>
         </>

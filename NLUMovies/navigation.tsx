@@ -2,11 +2,12 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 const Stack = createNativeStackNavigator();
 import React from "react";
-import { HomeScreen } from "./screens/HomeScreen";
+import HomeScreen  from "./screens/HomeScreen";
 import { MovieScreen } from "./screens/MovieScreen";
 import PersonScreen from "./screens/PersonScreen";
 import SearchScreen from "./screens/SearchScreen";
 import SeeAllScreen from "./screens/SeeAllScreen";
+import { Movie } from "./model/Movie";
 
 export default function Navigation() {
   // Navigation, dùng để chuyển hướng các screen của người dùng
@@ -26,4 +27,12 @@ export default function Navigation() {
       </Stack.Navigator>
     </NavigationContainer>
   );
+}
+
+export type RootStackParamList = {
+  'Home': undefined,
+  'Movie': Movie,
+  'Person': undefined,
+  'Search': undefined,
+  'See All': {movies: Movie[], title: string},
 }

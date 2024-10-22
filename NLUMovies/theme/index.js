@@ -9,8 +9,8 @@ export const styles = {
 };
 
 export const translate = {
-  Released: "Đã phát hành",
+  'Released': "Đã phát hành",
   "Post Production": "Hậu sản xuất",
   "In Production": "Đang sản xuất",
-  Acting: "Diễn viên",
+  'Acting': "Diễn viên",
 };
