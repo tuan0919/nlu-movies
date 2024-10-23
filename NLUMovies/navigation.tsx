@@ -9,6 +9,7 @@ import SearchScreen from "./screens/SearchScreen";
 import SeeAllScreen from "./screens/SeeAllScreen";
 import type { Movie } from "./model/Movie";
 import type { Cast } from "./model/Cast";
+import VideoScreen from "./screens/VideoScreen";
 
 export default function Navigation() {
   // Navigation, dùng để chuyển hướng các screen của người dùng
@@ -18,6 +19,7 @@ export default function Navigation() {
         screenOptions={{
           headerShown: false,
         }}
+        initialRouteName="View Video"
       >
         {/* 2. set HomeScreen làm screen mặc định (navigator sẽ load screen này đầu tiên) */}
         <Stack.Screen name="Home" component={HomeScreen} />
@@ -25,6 +27,7 @@ export default function Navigation() {
         <Stack.Screen name="Person" component={PersonScreen} />
         <Stack.Screen name="Search" component={SearchScreen} />
         <Stack.Screen name="See All" component={SeeAllScreen} />
+        <Stack.Screen name="View Video" component={VideoScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -36,4 +39,5 @@ export type RootStackParamList = {
   'Person': Cast,
   'Search': undefined,
   'See All': {movies: Movie[], title: string},
+  'View Video': undefined
 }

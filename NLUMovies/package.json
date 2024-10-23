@@ -23,6 +23,7 @@
     "react-native-progress": "^5.0.1",
     "react-native-snap-carousel-v4": "^1.0.1",
     "react-native-svg": "^15.1.0",
+    "react-native-video": "^6.7.0",
     "typewind": "^0.2.0",
     "use-lodash-debounce": "^1.3.0"
   },
