@@ -7,7 +7,8 @@ import { MovieScreen } from "./screens/MovieScreen";
 import PersonScreen from "./screens/PersonScreen";
 import SearchScreen from "./screens/SearchScreen";
 import SeeAllScreen from "./screens/SeeAllScreen";
-import { Movie } from "./model/Movie";
+import type { Movie } from "./model/Movie";
+import type { Cast } from "./model/Cast";
 
 export default function Navigation() {
   // Navigation, dùng để chuyển hướng các screen của người dùng
@@ -32,7 +33,7 @@ export default function Navigation() {
 export type RootStackParamList = {
   'Home': undefined,
   'Movie': Movie,
-  'Person': undefined,
+  'Person': Cast,
   'Search': undefined,
   'See All': {movies: Movie[], title: string},
 }

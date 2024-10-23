@@ -1,8 +1,8 @@
 import { View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
 import React from "react";
-import { Cast } from "../model/Cast";
+import type { Cast } from "../model/Cast";
 import { fallbackPersonImage, fetchImage185 } from "../api/moviedb";
-import { NavigationProp } from "@react-navigation/native";
+import type { NavigationProp } from "@react-navigation/native";
 
 type CastProps = {
   cast: Cast[];
@@ -18,8 +18,7 @@ export default function CastComponent({ cast, navigation }: CastProps): JSX.Elem
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 15 }}
       >
-        {cast &&
-          cast.map((person, index) => {
+        {cast.map((person, index) => {
             return (
               <TouchableOpacity
                 key={index}
@@ -31,19 +30,18 @@ export default function CastComponent({ cast, navigation }: CastProps): JSX.Elem
                     className="rounded-2xl h-24 w-20"
                     source={{
                       uri:
-                        fetchImage185(person?.profile_path) ||
-                        fallbackPersonImage,
+                      fetchImage185(person?.profile_path) || fallbackPersonImage,
                     }}
                   />
                 </View>
                 <Text className="text-white text-xs mt-1">
-                  {person?.character.length > 10
-                    ? person?.character.slice(0, 10) + "..."
+                  {(person.character ?? "Uknown Character").length > 10
+                    ? (person.character ?? "Uknown Character").slice(0, 10) + "..."
                     : person?.character}
                 </Text>
                 <Text className="text-neutral-400 text-xs mt-1">
-                  {person?.original_name.length > 10
-                    ? person?.original_name.slice(0, 10) + "..."
+                  {(person.original_name ?? "Uknown name").length > 10
+                    ? (person.original_name ?? "Uknown name").slice(0, 10) + "..."
                     : person?.original_name}
                 </Text>
               </TouchableOpacity>

@@ -18,17 +18,18 @@ import { debounce } from "lodash";
 import {
   fallbackMoviesPoster,
   fetchImage185,
-  fetchSearchMovies,
 } from "../api/moviedb";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../navigation";
-import { Movie } from "../model/Movie";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../navigation";
+import type { Movie } from "../model/Movie";
+import { MovieRepository } from "../repositories/MovieRepository";
 var { width, height } = Dimensions.get("window");
 
 export default function SearchScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [results, setResults] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const movieRepository = new MovieRepository();
   return (
     <SafeAreaView className="bg-neutral-800 flex-1">
       <View
@@ -40,21 +41,18 @@ export default function SearchScreen() {
             debounce((value) => {
               if (value && value.length > 2) {
                 setLoading(true);
-                fetchSearchMovies({
+                movieRepository.searchMovies({
                   query: value,
                   include_adult: "false",
                   language: "vi",
                   page: "1",
-                }).then((data) => {
-                  setLoading(false);
-                  if (data && data.results) setResults(data.results);
-                });
-              } else {
-                setLoading(false);
+                }).then((data) => setResults(data));
+              } 
+              else {
                 setResults([]);
               }
-            }, 400),
-            []
+              setLoading(false);
+            }, 400), []
           )}
           placeholder="Tìm thông tin phim"
           placeholderTextColor={"lightgray"}
@@ -80,6 +78,15 @@ export default function SearchScreen() {
           </Text>
           <View className="flex-row justify-between flex-wrap">
             {results.map((item, index) => {
+              type MOVIE_DEFAULT = {
+                poster_path: string,
+                title: string
+              }
+              const {poster_path, title} : MOVIE_DEFAULT = {
+                title: "Unknown Title",
+                poster_path: fallbackMoviesPoster,
+                ... item
+              }
               return (
                 <TouchableWithoutFeedback
                   key={index}
@@ -89,16 +96,14 @@ export default function SearchScreen() {
                     <Image
                       className="rounded-xl"
                       source={{
-                        uri:
-                        item?.poster_path && fetchImage185(item?.poster_path) 
-                        || fallbackMoviesPoster,
+                        uri:fetchImage185(poster_path) 
                       }}
                       style={{ width: width * 0.44, height: height * 0.3 }}
                     />
                     <Text className="text-neutral-400 ml-1">
-                      {item?.title.length > 22
-                        ? item?.title.slice(0, 22) + "..."
-                        : item?.title}
+                      {title.length > 22
+                        ? title.slice(0, 22) + "..."
+                        : title}
                     </Text>
                   </View>
                 </TouchableWithoutFeedback>

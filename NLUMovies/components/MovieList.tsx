@@ -9,11 +9,11 @@ import {
 } from "react-native";
 import React from "react";
 import { styles } from "../theme";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { type NavigationProp, useNavigation } from "@react-navigation/native";
 import { fallbackMoviesPoster, fetchImage185 } from "../api/moviedb";
-import { RootStackParamList } from "../navigation";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Movie } from "../model/Movie";
+import type { RootStackParamList } from "../navigation";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { Movie } from "../model/Movie";
 var { width, height } = Dimensions.get("window");
 
 type MovieListProp = {

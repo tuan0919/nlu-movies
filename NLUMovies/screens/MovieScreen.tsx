@@ -9,7 +9,7 @@ import {
   Image,
 } from "react-native";
 import React, { useState } from "react";
-import { NavigationProp, RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import { type NavigationProp, type RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { useEffect } from "react";
 import { ChevronLeftIcon, HeartIcon } from "react-native-heroicons/outline";
 import { styles, theme, translate } from "../theme";
@@ -20,57 +20,60 @@ import Loading from "../components/Loading";
 import {
   fallbackMoviesPoster,
   fetchImage500,
-  fetchMovieCredits,
-  fetchMovieDetails,
-  fetchMovieIMDB,
-  fetchMovieSimilars,
 } from "../api/moviedb";
-import { Cast } from "../model/Cast";
-import { Movie } from "../model/Movie";
-import { RootStackParamList } from "../navigation";
+import type { Cast } from "../model/Cast";
+import type { Movie } from "../model/Movie";
+import type { RootStackParamList } from "../navigation";
+import { IMDBRepository } from "../repositories/imdbRepository";
+import { CastRepository } from "../repositories/CastRepository";
+import { MovieRepository } from "../repositories/MovieRepository";
+import UserScore from "../components/UserScore";
+import type { MovieDetails } from "../model/MovieDetails";
 var { width, height } = Dimensions.get("window");
 const ios = Platform.OS === "ios";
 const topMargin = ios ? "" : "mt-3";
 export function MovieScreen() {
   const { params: item } = useRoute<RouteProp<RootStackParamList, 'Movie'>>();
-  const navigation : NavigationProp<Movie | Cast> = useNavigation();
+  const navigation : NavigationProp<Movie | Cast[]> = useNavigation();
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [cast, setCast] = useState<Cast[]>([]);
   const [similarMovies, setSimilarMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [movie, setMovie] = useState<Movie | undefined>(undefined);
+  const [movie, setMovie] = useState<MovieDetails | undefined>(undefined);
+  const imdbRepository = new IMDBRepository();
+  const castRepository = new CastRepository();
+  const movieRepository = new MovieRepository();
+  let imdb_score = 0;
   useEffect(() => {
     setLoading(true);
     // Gọi api để lấy chi tiết thông tin phim
     const fetching = async () => {
-      const movie = await loadDetailsMovie(item);
-      const score = await loadIMDB(movie.imdb_id);
-      setMovie({ ...movie, imdb_score: score });
-      await loadCreditsMovie(item);
-      await loadSimilarsMovie(item);
+      await loadDetailsMovie(item);
+      await Promise.all([
+        (async () => {
+          if (movie) {
+            imdb_score = await imdbRepository.fetchImdbScore(Number(movie.imdb_id));
+          }
+        })(),
+        loadCreditsMovie(item),
+        loadSimilarsMovie(item)
+      ])
       setLoading(false);
     };
     fetching();
   }, [item]);
+  
   const loadDetailsMovie = async ({id} : Movie) => {
-    const data = await fetchMovieDetails(id);
-    if (data) setMovie(data);
-    return data;
+    const data = await movieRepository.fetchMovieDetails(id);
+    setMovie(data);
   };
   const loadCreditsMovie = async ({id} : Movie) => {
-    const data = await fetchMovieCredits(id);
-    if (data && data.cast) setCast(data.cast);
+    const data = await castRepository.fetchPerson(id)
+    data && setCast(data);
   };
   const loadSimilarsMovie = async ({id} : Movie) => {
-    const data = await fetchMovieSimilars(id);
-    if (data && data.results) setSimilarMovies(data.results);
-  };
-  const loadIMDB = async ({imdb_id}: Movie) => {
-    let data = undefined;
-    if (imdb_id) {
-      data = await fetchMovieIMDB(imdb_id);
-    }
-    return data?.metacritic?.metascore?.score;
+    const data = await movieRepository.fetchSimilarMovies(id);
+    setSimilarMovies(data)
   };
   return (
     <ScrollView
@@ -122,7 +125,7 @@ export function MovieScreen() {
               end={{ x: 0.5, y: 0.9 }}
               className="absolute bottom-0"
             />
-            {!!movie?.vote_average && !!movie?.imdb_score && (
+            {!!movie?.vote_average && !!imdb_score && (
               <View
                 style={{
                   position: "absolute",
@@ -134,35 +137,7 @@ export function MovieScreen() {
                   gap: 60,
                 }}
               >
-                <View>
-                  <View
-                    className="border-4 rounded-full justify-center"
-                    style={{
-                      height: 80,
-                      width: 80,
-                      borderColor: theme.text,
-                      backgroundColor: "rgba(0,0,0,.5)",
-                      marginTop: 50,
-                    }}
-                  >
-                    <View>
-                      <Text className="text-center text-white font-bold text-base">
-                        {parseInt(movie.vote_average) * 10}%
-                      </Text>
-                    </View>
-                  </View>
-                  <Text
-                    className="text-center text-white font-semibold text-base whitespace-nowrap mt-3 rounded-md"
-                    style={{
-                      backgroundColor: theme.background,
-                      alignSelf: "center",
-                      paddingHorizontal: 7,
-                      paddingVertical: 1,
-                    }}
-                  >
-                    UserScore
-                  </Text>
-                </View>
+                <UserScore vote_average={movie.vote_average}/>
                 <View>
                   <View
                     className="border-4 rounded-full justify-center"
@@ -176,7 +151,7 @@ export function MovieScreen() {
                   >
                     <View>
                       <Text className="text-center text-white font-bold text-base">
-                        {parseInt(movie.imdb_score)}%
+                        {imdb_score}%
                       </Text>
                     </View>
                   </View>
@@ -206,7 +181,7 @@ export function MovieScreen() {
             {movie?.id ? (
               <Text className="text-neutral-400 font-semibold text-base text-center">
                 {movie.status && translate[movie.status as keyof typeof translate] || movie.status} •{" "}
-                {movie?.release_date} • {parseInt(movie.runtime) / 60} giờ{" "}
+                {movie?.release_date} • {movie.runtime / 60} giờ{" "}
                 {Number(movie.runtime) % 60} phút
               </Text>
             ) : null}

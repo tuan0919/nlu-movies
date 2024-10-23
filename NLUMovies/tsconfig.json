@@ -3,6 +3,9 @@
     "./**/*"
   ],
   "compilerOptions": {
+    "preserveValueImports": false,
+    "importsNotUsedAsValues": "remove",
+    "verbatimModuleSyntax": true,
     "target": "esnext",
     "module": "esnext",
     "strict": true,

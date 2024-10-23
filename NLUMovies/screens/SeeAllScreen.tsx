@@ -10,15 +10,15 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { ChevronLeftIcon } from "react-native-heroicons/outline";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute, type RouteProp } from "@react-navigation/native";
 import { styles } from "../theme";
 import { fallbackMoviesPoster, fetchImage185 } from "../api/moviedb";
+import type { RootStackParamList } from "../navigation";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 var { width, height } = Dimensions.get("window");
 export default function SeeAllScreen() {
-  const {
-    params: { data: movies, title },
-  } = useRoute(); // 4.1.3 lấy ra data đc navigator chuyển đến screen này
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { params: {movies, title} } = useRoute<RouteProp<RootStackParamList, 'See All'>>();
   // 4.1.4 return ScrollView
   return (
     <ScrollView className="bg-neutral-800 flex-1">
@@ -59,8 +59,8 @@ export default function SeeAllScreen() {
                   style={{ width: width * 0.44, height: height * 0.3 }}
                 />
                 <Text className="text-neutral-400 ml-1 text-center">
-                  {item?.title.length > 22
-                    ? item?.title.slice(0, 22) + "..."
+                  {(item?.title ?? "Unknown Title").length > 22
+                    ? (item?.title ?? "Unknown Title").slice(0, 22) + "..."
                     : item?.title}
                 </Text>
               </View>

@@ -11,41 +11,49 @@ import {
 import React, { useEffect, useState } from "react";
 import { styles, theme, translate } from "../theme";
 import { ChevronLeftIcon, HeartIcon } from "react-native-heroicons/outline";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { type NavigationProp, type RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import MovieList from "../components/MovieList";
 import Loading from "../components/Loading";
 import {
   fallbackPersonImage,
   fetchImage342,
-  fetchPersonDetails,
-  fetchPersonMovies,
 } from "../api/moviedb";
+import type { PersonDetails } from "../model/PersonDetails";
+import { CastRepository } from "../repositories/CastRepository";
+import type { Movie } from "../model/Movie";
+import type { RootStackParamList } from "../navigation";
+import { MovieRepository } from "../repositories/MovieRepository";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 var { width, height } = Dimensions.get("window");
 const ios = Platform.OS === "ios";
 export default function PersonScreen() {
-  const { params: item } = useRoute();
-  const [isFavorite, setIsFavorite] = useState(false);
-  const navigation = useNavigation();
-  const [personMovies, setPersonMovies] = useState([]);
-  const [person, setPerson] = useState({});
-  const [loading, setLoading] = useState(false);
+  const { params: item } = useRoute<RouteProp<RootStackParamList, 'Person'>>();
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [personMovies, setPersonMovies] = useState<Movie[]>([]);
+  const [person, setPerson] = useState<PersonDetails | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const castRepository = new CastRepository();
+  const movieRepository = new MovieRepository();
   useEffect(() => {
     setLoading(true);
     const fetch = async () => {
-      await loadPersonDetails(item.id);
-      await loadPersonMovies(item.id);
+      Promise.all([
+        loadPersonDetails(item.id),
+        loadPersonMovies(item.id)
+      ])
       setLoading(false);
     };
     fetch();
   }, [item]);
-  const loadPersonDetails = async function (id) {
-    const data = await fetchPersonDetails(id);
-    if (data) setPerson(data);
+  const loadPersonDetails = async function (personId: string) {
+    const data = await castRepository.fetchPersonDetails(personId);
+    setPerson(data);
   };
-  const loadPersonMovies = async function (id) {
-    const data = await fetchPersonMovies(id);
-    if (data) setPersonMovies(data.cast);
+  const loadPersonMovies = async function (personId: string) {
+    const data = await movieRepository.fetchMoviesOfPerson(personId);
+    setPersonMovies(data)
   };
   return (
     <ScrollView
@@ -117,8 +125,7 @@ export default function PersonScreen() {
             <View className="border-r-2 border-r-neutral-400 px-2 items-center">
               <Text className="text-white font-semibold">Được biết đến</Text>
               <Text className="text-neutral-300 text-sm">
-                {translate[person?.known_for_department] ||
-                  person?.known_for_department}
+                {translate[person?.known_for_department as keyof typeof translate ] ?? "Không rõ" }
               </Text>
             </View>
             <View className="px-2 items-center">
@@ -135,7 +142,7 @@ export default function PersonScreen() {
             </Text>
           </View>
           <View className="mt-7">
-            <MovieList title="Phim cùng diễn viên" data={personMovies} />
+            <MovieList title="Phim cùng diễn viên" movies={personMovies} />
           </View>
         </View>
       )}

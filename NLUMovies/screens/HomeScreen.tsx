@@ -15,13 +15,13 @@ import { styles } from "../theme";
 import { TrendingMovies } from "../components/TrendingMovies";
 import { useEffect, useState } from "react";
 import MovieList from "../components/MovieList";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { type NavigationProp, useNavigation } from "@react-navigation/native";
 import Loading from "../components/Loading";
 import { MovieRepository } from "../repositories/MovieRepository";
 import React from "react";
-import { RootStackParamList } from "../navigation";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Movie } from "../model/Movie";
+import type { RootStackParamList } from "../navigation";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { Movie } from "../model/Movie";
 const ios = Platform.OS === "ios";
 
 export default function HomeScreen() : JSX.Element {
@@ -91,7 +91,7 @@ export default function HomeScreen() : JSX.Element {
           contentContainerStyle={{ paddingBottom: 10, paddingTop: 10 }}
         >
           {/* Trending movies carousel */}
-          {trending.length > 0 && <TrendingMovies data={trending} />}
+          {trending.length > 0 && <TrendingMovies movies={trending} />}
           {/* Upcoming movies */}
           <MovieList title="Phim sắp chiếu" movies={upcoming} />
           {/* Top-rating movies */}
