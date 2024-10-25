@@ -81,3 +81,15 @@ async function getUser() {
   }
 }
 ```
+
+
+5 phần
+1.Giới thiêuj bài toán
+Anh Đức Lê
+10:57
+2. Kiến thức cần cóa (lướt) style, componenet, state, props, hook cơ bản
+nếu migrate ts thì nói, ko thì thôi
+3. Đa luồng
+4. Triển khai thực tế
+chia folder, sắp xếp cấu trúc, quản lý types
+5 demo, xuất ra apk thì ok
