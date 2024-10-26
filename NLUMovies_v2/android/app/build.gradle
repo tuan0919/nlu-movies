@@ -93,6 +93,9 @@ android {
             keyPassword 'android'
         }
     }
+    packagingOptions {
+        exclude 'META-INF/*'
+    }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
@@ -110,7 +113,8 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
-
+    implementation(platform("software.amazon.awssdk:bom:2.27.21"))
+    implementation("software.amazon.awssdk:s3")
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {
