@@ -1,5 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import {
+  Button,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -22,6 +23,7 @@ import React from 'react';
 import type { RootStackParamList } from '../navigation';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { Movie } from '../model/Movie';
+import NativeS3Uploader from '../../specs/NativeS3Uploader';
 
 export default function HomeScreen() : JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -63,6 +65,13 @@ export default function HomeScreen() : JSX.Element {
               Movies
             </Text>
           </TouchableOpacity>
+          <Button
+            title="Click me to sayHello() via JSI"
+            onPress={async () => {
+              const message = await NativeS3Uploader.sayHello();
+              console.log(message);
+            }}
+            />
           <TouchableOpacity onPress={() => navigation.navigate('Search')}>
             <MagnifyingGlassIcon size="30" strokeWidth={2} color="white" />
           </TouchableOpacity>

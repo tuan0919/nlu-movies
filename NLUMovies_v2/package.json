@@ -51,5 +51,13 @@
   },
   "engines": {
     "node": ">=18"
-  }
+  },
+  "codegenConfig": {
+     "name": "NativeS3UploaderSpec",
+     "type": "modules",
+     "jsSrcsDir": "specs",
+     "android": {
+       "javaPackageName": "com.natives3uploader"
+     }
+   }
 }
