@@ -9,7 +9,7 @@ import {
   Platform,
   Image,
 } from 'react-native';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { type NavigationProp, type RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { useEffect } from 'react';
 import { ChevronLeftIcon, HeartIcon } from 'react-native-heroicons/outline';
@@ -30,6 +30,7 @@ import { CastRepository } from '../repositories/CastRepository';
 import { MovieRepository } from '../repositories/MovieRepository';
 import UserScore from '../components/UserScore';
 import type { MovieDetails } from '../model/MovieDetails';
+import { ApplicationException } from '../exception/AppException';
 var { width, height } = Dimensions.get('window');
 const ios = Platform.OS === 'ios';
 const topMargin = ios ? '' : 'mt-3';
@@ -41,41 +42,59 @@ export function MovieScreen() {
   const [similarMovies, setSimilarMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [movie, setMovie] = useState<MovieDetails | undefined>(undefined);
-  const imdb_score = useRef(0);
+  const [imdb_score, setImdb_Score] = useState<number>(0);
 
   useEffect(() => {
     const imdbRepository = new IMDBRepository();
     const castRepository = new CastRepository();
     const movieRepository = new MovieRepository();
     setLoading(true);
-    // Gọi api để lấy chi tiết thông tin phim
+
+    const loadDetailsMovie = async ({id} : Movie) => {
+      const data = await movieRepository.fetchMovieDetails(id);
+      data && setMovie(data);
+      return data;
+    };
+    const loadCreditsMovie = async ({id} : Movie) => {
+      const data = await castRepository.fetchPerson(id);
+      data && setCast(data);
+      return data;
+    };
+    const loadSimilarsMovie = async ({id} : Movie) => {
+      const data = await movieRepository.fetchSimilarMovies(id);
+      setSimilarMovies(data);
+      return data;
+    };
+
     const fetching = async () => {
-      const loadDetailsMovie = async ({id} : Movie) => {
-        const data = await movieRepository.fetchMovieDetails(id);
-        setMovie(data);
-      };
-      const loadCreditsMovie = async ({id} : Movie) => {
-        const data = await castRepository.fetchPerson(id);
-        data && setCast(data);
-      };
-      const loadSimilarsMovie = async ({id} : Movie) => {
-        const data = await movieRepository.fetchSimilarMovies(id);
-        setSimilarMovies(data);
-      };
-      await loadDetailsMovie(item);
-      await Promise.all([
-        (async () => {
-          if (movie) {
-            imdb_score.current = await imdbRepository.fetchImdbScore(Number(movie.imdb_id));
-          }
-        })(),
-        loadCreditsMovie(item),
-        loadSimilarsMovie(item),
-      ]);
-      setLoading(false);
+      try {
+        const movieDetails = await loadDetailsMovie(item);
+        await Promise.all([
+          (async () => {
+            if (movieDetails?.imdb_id) {
+              const score = await imdbRepository.fetchImdbScore(movieDetails.imdb_id);
+              console.log('điểm imdb: ', score);
+              setImdb_Score(score);
+            }
+          })(),
+          loadCreditsMovie(item),
+          loadSimilarsMovie(item),
+        ]);
+      } catch (error) {
+        if (error instanceof ApplicationException) {
+          const castedError = error as ApplicationException;
+          console.error(castedError.message);
+        }
+        else {
+          console.error('Lỗi không xác định:', error);
+        }
+      } finally {
+        setLoading(false); // Đảm bảo setLoading được gọi trong khối finally
+      }
     };
     fetching();
-  }, [item, movie]);
+  }, [item]);
+
   return (
     <ScrollView
       contentContainerStyle={{
@@ -126,8 +145,7 @@ export function MovieScreen() {
               end={{ x: 0.5, y: 0.9 }}
               className="absolute bottom-0"
             />
-            {!!movie?.vote_average && !!imdb_score && (
-              <View
+            <View
                 style={{
                   position: 'absolute',
                   alignItems: 'center',
@@ -138,7 +156,7 @@ export function MovieScreen() {
                   gap: 60,
                 }}
               >
-                <UserScore vote_average={movie.vote_average}/>
+                <UserScore vote_average={movie?.vote_average || 0}/>
                 <View>
                   <View
                     className="border-4 rounded-full justify-center"
@@ -152,7 +170,7 @@ export function MovieScreen() {
                   >
                     <View>
                       <Text className="text-center text-white font-bold text-base">
-                        {imdb_score.current}%
+                        {imdb_score}
                       </Text>
                     </View>
                   </View>
@@ -169,7 +187,6 @@ export function MovieScreen() {
                   </Text>
                 </View>
               </View>
-            )}
           </View>
         )}
       </View>

@@ -1,11 +1,12 @@
-import axios from "axios";
-import { Endpoints } from "../api/moviedb";
-import type { Movie } from "../model/Movie";
-import type { MovieDetails } from "../model/MovieDetails";
+import axios from 'axios';
+import { Endpoints } from '../api/moviedb';
+import type { Movie } from '../model/Movie';
+import type { MovieDetails } from '../model/MovieDetails';
+import { ApplicationException } from '../exception/AppException';
 
 export class MovieRepository {
-    private static API_KEY = "db55323b8d3e4154498498a75642b381";
-    private static apiBaseURL = "https://api.themoviedb.org/3";
+    private static API_KEY = 'db55323b8d3e4154498498a75642b381';
+    private static apiBaseURL = 'https://api.themoviedb.org/3';
 
     private _movieSimilars = (id: string) =>
         `${MovieRepository.apiBaseURL}/movie/${id}/similar?language=vi&api_key=${MovieRepository.API_KEY}`;
@@ -18,17 +19,20 @@ export class MovieRepository {
 
     private async _apiCall <T>  (endpoint: string, params?: any): Promise<T> {
         const options = {
-            method: "GET",
+            method: 'GET',
             url: endpoint,
             params: params ? params : {},
         };
         try {
             return axios.request<T>(options).then(value => value.data);
         } catch (error) {
-            console.error(error)
-            throw Error(`Lỗi xảy ra khi fetch endpoint: ${endpoint}`)
+            throw new ApplicationException({
+                message: `Lỗi khi fetch: ${endpoint}`,
+                code: 999,
+                statusCode: 400,
+            });
         }
-    };
+    }
 
     async fetchTrendingMovies(): Promise<Movie[]> {
         type MovieResponse = {
@@ -38,7 +42,7 @@ export class MovieRepository {
         const {results : response} = await this._apiCall<MovieResponse>(Endpoints.TRENDINGS);
         return response;
     }
-    
+
     async fetchTopRatedMovies(): Promise<Movie[]> {
         type MovieResponse = {
             page: number,
@@ -47,7 +51,7 @@ export class MovieRepository {
         const {results : response} = await this._apiCall<MovieResponse>(Endpoints.TOP_RATEDS);
         return response;
     }
-    
+
     async fetchUpcomingMovies(): Promise<Movie[]> {
         type MovieResponse = {
             page: number,
@@ -77,6 +81,7 @@ export class MovieRepository {
 
     async fetchMovieDetails(id: string): Promise<MovieDetails> {
         const response = await this._apiCall<MovieDetails>(this._movieDetails(id));
+        console.log(response);
         return response;
     }
 

@@ -1,29 +1,34 @@
-import axios from "axios";
+import axios from 'axios';
+import { ApplicationException } from '../exception/AppException';
 
 interface imdbResponse {
-    metacritic?: {
-        metascore?: {
+    ratings: {
+        imdb: {
             score: number
         },
     },
 }
 
 export class IMDBRepository {
-    private static apiImdbURL = "https://imdb146.p.rapidapi.com/v1";
-    private static API_KEY_IMDB = "b788cc0a90mshb82dc764acf1b06p12481djsn2e181b7b63f2";
-    private static API_HOST = "imdb146.p.rapidapi.com";
-
-    async fetchImdbScore(movie_id: number): Promise<number> {
+    async fetchImdbScore(movie_id: string): Promise<number> {
         const options = {
-            method: "GET",
-            url: `${IMDBRepository.apiImdbURL}/title/?id=${movie_id}`,
+            method: 'GET',
+            url: `https://movies-ratings2.p.rapidapi.com/ratings?id=${movie_id}`,
             headers: {
-              "X-RapidAPI-Key": `${IMDBRepository.API_KEY_IMDB}`,
-              "X-RapidAPI-Host": `${IMDBRepository.API_HOST}`,
+              'x-rapidapi-key': 'ae90efe78cmsh6c4beb5321d6b04p1280cbjsnf13142e25e8d',
+              'x-rapidapi-host': 'movies-ratings2.p.rapidapi.com',
             },
           };
-        const response = await axios.request(options);
-        const result = await response.data as imdbResponse;
-        return result.metacritic?.metascore?.score || 0;
+        try {
+            const response = await axios.request(options);
+            const result = await response.data as imdbResponse;
+            return result.ratings.imdb.score || 0;
+        } catch (exception) {
+            throw new ApplicationException({
+                code: 9999,
+                message: `Lỗi khi fetch điểm imdb của phim: ${movie_id}`,
+                statusCode: 404,
+            });
+        }
     }
 }
