@@ -18,7 +18,7 @@ public class NativeS3UploaderPackage extends TurboReactPackage {
     @Override
     public NativeModule getModule(@NonNull String s, @NonNull ReactApplicationContext reactApplicationContext) {
         if (s.equals(NativeS3UploaderModule.NAME)) {
-            return new NativeS3UploaderModule(reactApplicationContext);
+            return new MyNativeS3UploadModule(reactApplicationContext);
         } else {
             return null;
         }
@@ -31,9 +31,9 @@ public class NativeS3UploaderPackage extends TurboReactPackage {
             @Override
             public Map<String, ReactModuleInfo> getReactModuleInfos() {
                 Map<String, ReactModuleInfo> map = new HashMap<>();
-                map.put(NativeS3UploaderModule.NAME, new ReactModuleInfo(
-                        NativeS3UploaderModule.NAME,       // name
-                        NativeS3UploaderModule.NAME,       // className
+                map.put(MyNativeS3UploadModule.NAME, new ReactModuleInfo(
+                        MyNativeS3UploadModule.NAME,       // name
+                        MyNativeS3UploadModule.NAME,       // className
                         false, // canOverrideExistingModule
                         false, // needsEagerInit
                         false, // isCXXModule

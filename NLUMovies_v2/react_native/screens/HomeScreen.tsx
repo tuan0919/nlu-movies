@@ -24,6 +24,10 @@ import type { RootStackParamList } from '../navigation';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { Movie } from '../model/Movie';
 import NativeS3Uploader from '../../specs/NativeS3Uploader';
+import {
+  NativeEventEmitter,
+  NativeModules,
+} from 'react-native';
 
 export default function HomeScreen() : JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -31,6 +35,7 @@ export default function HomeScreen() : JSX.Element {
   const [upcoming, setUpcoming] = useState<Movie[]>([]);
   const [topRated, setTopRated] = useState<Movie[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const eventEmitter = new NativeEventEmitter(NativeModules.NativeS3Uploader);
   const startLoading = () => {
     const movieRepository = new MovieRepository();
     const loadTrendingMovies = async function () {
@@ -52,6 +57,16 @@ export default function HomeScreen() : JSX.Element {
     };
     fetching();
   };
+
+  useEffect(() => {
+    eventEmitter.addListener('updateProgress', (progress: number) => {
+      console.log(progress);
+    });
+    return () => {
+      eventEmitter.removeAllListeners('updateProgress');
+    };
+  });
+
   useEffect(startLoading, []);
   return (
     <View className="flex-1 bg-neutral-800">
@@ -66,10 +81,14 @@ export default function HomeScreen() : JSX.Element {
             </Text>
           </TouchableOpacity>
           <Button
-            title="Click me to sayHello() via JSI"
+            title="Click me to upload via JSI"
             onPress={async () => {
-              const message = await NativeS3Uploader.sayHello();
-              console.log(message);
+              try {
+                const message = await NativeS3Uploader.uploadFile('testFile.mp3');
+                console.log(message);
+              } catch (error) {
+                console.error(error);
+              }
             }}
             />
           <TouchableOpacity onPress={() => navigation.navigate('Search')}>

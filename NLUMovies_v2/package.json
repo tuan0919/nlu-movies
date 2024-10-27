@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native/codegen": "^0.76.0",
     "@react-navigation/native": "^6.1.15",
     "@react-navigation/native-stack": "^6.9.25",
     "axios": "^1.6.7",
@@ -53,11 +54,11 @@
     "node": ">=18"
   },
   "codegenConfig": {
-     "name": "NativeS3UploaderSpec",
-     "type": "modules",
-     "jsSrcsDir": "specs",
-     "android": {
-       "javaPackageName": "com.natives3uploader"
-     }
-   }
+    "name": "NativeS3UploaderSpec",
+    "type": "modules",
+    "jsSrcsDir": "specs",
+    "android": {
+      "javaPackageName": "com.natives3uploader"
+    }
+  }
 }
