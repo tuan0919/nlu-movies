@@ -32,7 +32,7 @@ export function TrendingMovies({ movies } : TrendingMoviesProps) {
         renderItem={({ item } : {item: any}) => (
           <MovieCard movie={item as Movie} handleClick={handleClick} />
         )}
-        firstItem={1}
+        firstItem={3}
         inactiveSlideOpacity={0.6}
         sliderWidth={width}
         itemWidth={width * 0.62}

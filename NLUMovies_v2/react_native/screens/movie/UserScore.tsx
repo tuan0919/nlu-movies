@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import { View, Text } from 'react-native';
 import React from 'react';
-import { theme } from '../theme';
+import { theme } from '../../theme/index';
 
 export default function UserScore({vote_average} : {vote_average : number}) : React.JSX.Element {
     return (
