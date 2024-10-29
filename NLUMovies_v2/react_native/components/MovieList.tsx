@@ -20,7 +20,7 @@ var { width, height } = Dimensions.get('window');
 type MovieListProp = {
   title: string,
   movies: Movie[],
-  hideSeeAll?: boolean
+  hideSeeAll?: boolean,
 }
 
 export default function MovieList({ title, movies, hideSeeAll = false } : MovieListProp) : React.JSX.Element {
