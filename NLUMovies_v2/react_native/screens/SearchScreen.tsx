@@ -22,7 +22,7 @@ import {
   fetchImage185,
 } from '../api/moviedb';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation';
+import type { RootStackParamList } from './navigation/navigation';
 import type { Movie } from '../model/Movie';
 import { MovieRepository } from '../repositories/MovieRepository';
 var { width, height } = Dimensions.get('window');

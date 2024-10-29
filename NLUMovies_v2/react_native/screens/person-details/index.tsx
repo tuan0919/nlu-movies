@@ -12,7 +12,7 @@ import {
 import type { PersonDetails } from '../../model/PersonDetails';
 import { CastRepository } from '../../repositories/CastRepository';
 import type { Movie } from '../../model/Movie';
-import type { RootStackParamList } from '../../navigation';
+import type { RootStackParamList } from '../navigation/navigation';
 import { MovieRepository } from '../../repositories/MovieRepository';
 import PersonAvatar from './PersonAvatar';
 import PersonInfo from './PersonInfo';

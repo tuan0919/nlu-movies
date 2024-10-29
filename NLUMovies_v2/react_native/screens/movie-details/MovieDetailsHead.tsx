@@ -3,7 +3,7 @@ import { TouchableOpacity, View } from "react-native"
 import IconWrapper from "./IconWrapper"
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { RootStackParamList } from "../../navigation";
+import type { RootStackParamList } from "../navigation/navigation";
 import { ChevronLeftIcon, HeartIcon } from "react-native-heroicons/outline";
 
 

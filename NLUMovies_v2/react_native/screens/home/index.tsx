@@ -10,7 +10,7 @@ import MovieList from '../../components/MovieList';
 import { useNavigation } from '@react-navigation/native';
 import Loading from '../../components/Loading';
 import React from 'react';
-import type { RootStackParamList } from '../../navigation';
+import type { RootStackParamList } from '../navigation/navigation';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   NativeEventEmitter,
@@ -25,8 +25,6 @@ import { MovieRepository } from '../../repositories/MovieRepository';
 
 export default function HomeScreen() : JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  
-  
   const [trending, setTrending] = useState<Movie[]>([]);
   const [upcoming, setUpcoming] = useState<Movie[]>([]);
   const [topRated, setTopRated] = useState<Movie[]>([]);

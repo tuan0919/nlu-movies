@@ -14,7 +14,7 @@ import { ChevronLeftIcon } from 'react-native-heroicons/outline';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { styles } from '../theme';
 import { fallbackMoviesPoster, fetchImage185 } from '../api/moviedb';
-import type { RootStackParamList } from '../navigation';
+import type { RootStackParamList } from './navigation/navigation';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 var { width, height } = Dimensions.get('window');
 export default function SeeAllScreen() {

@@ -2,7 +2,7 @@ import React from "react"
 import { TouchableOpacity, StyleSheet, SafeAreaView, Platform } from "react-native"
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { RootStackParamList } from "../../navigation";
+import type { RootStackParamList } from "../navigation/navigation";
 import { ChevronLeftIcon, HeartIcon } from "react-native-heroicons/outline";
 const ios = Platform.OS === 'ios';
 const topMargin = ios ? '' : 'mt-3';

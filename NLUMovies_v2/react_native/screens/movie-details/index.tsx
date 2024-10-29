@@ -2,7 +2,7 @@ import {
   Dimensions,
 } from 'react-native';
 import React, { useState } from 'react';
-import { type NavigationProp, type RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { type RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { useEffect } from 'react';
 import CastComponent from '../../components/Cast';
 import MovieList from '../../components/MovieList';
@@ -14,7 +14,7 @@ import {
 } from '../../api/moviedb';
 import type { Cast } from '../../model/Cast';
 import type { Movie } from '../../model/Movie';
-import type { RootStackParamList } from '../../navigation';
+import type { RootStackParamList } from '../navigation/navigation';
 import { IMDBRepository } from '../../repositories/imdbRepository';
 import { CastRepository } from '../../repositories/CastRepository';
 import { MovieRepository } from '../../repositories/MovieRepository';
@@ -25,10 +25,11 @@ import Poster from './Poster';
 import IMDB from './IMDB';
 import MovieContent from './MovieContent';
 import MovieDetailsHead from './MovieDetailsHead';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 var { height } = Dimensions.get('window');
 export function MovieScreen() {
   const { params: item } = useRoute<RouteProp<RootStackParamList, 'Movie'>>();
-  const navigation : NavigationProp<Movie | Cast[]> = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [cast, setCast] = useState<Cast[]>([]);
   const [similarMovies, setSimilarMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
