@@ -2,7 +2,7 @@
 import React from 'react';
 import { ScrollView, View } from 'react-native';
 
-function HomeBody({children} : {children: React.JSX.Element}) {
+export default function HomeBody({children} : {children: React.JSX.Element}) {
     return (
         <View className="flex-1 bg-neutral-800">
             <ScrollView

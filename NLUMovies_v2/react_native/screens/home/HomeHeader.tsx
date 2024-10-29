@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
   },
 });
 
-function HomeHeader({children} : {children: React.JSX.Element}): React.JSX.Element {
+export default function HomeHeader({children} : {children: React.JSX.Element}): React.JSX.Element {
     return (
       <SafeAreaView>
         <View style={styles.header}>
