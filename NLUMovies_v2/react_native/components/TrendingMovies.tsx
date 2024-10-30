@@ -12,7 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { fetchImage500 } from '../api/moviedb';
 import type { Movie } from '../model/Movie';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation';
+import type { RootStackParamList } from '../screens/navigation/navigation';
 var { width, height } = Dimensions.get('window');
 
 type TrendingMoviesProps = {
