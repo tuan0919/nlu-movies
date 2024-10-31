@@ -1,5 +1,6 @@
 import {
   Dimensions,
+  View,
 } from 'react-native';
 import React, { useState } from 'react';
 import { type RouteProp, useNavigation, useRoute } from '@react-navigation/native';
@@ -26,6 +27,7 @@ import IMDB from './IMDB';
 import MovieContent from './MovieContent';
 import MovieDetailsHead from './MovieDetailsHead';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import EpisodeList from './EpisodesList';
 var { height } = Dimensions.get('window');
 export function MovieScreen() {
   const { params: item } = useRoute<RouteProp<RootStackParamList, 'Movie'>>();
@@ -103,13 +105,13 @@ export function MovieScreen() {
         )}
         </MovieDetailsHead>
         {loading || (
-          <>
+          <View className='bg-neutral-950'>
             <MovieContent movieDetails={movie}/>
-            {/* Diễn viên */}
+            {/* Danh sách tập phim */}
             <CastComponent navigation={navigation} cast={cast} />
             {/* Phim cùng thể loại */}
             <MovieList title={'Phim cùng thể loại'} hideSeeAll={true} movies={similarMovies} />
-          </>
+          </View>
         )}
       </>
     </MovieDetailsContainer>

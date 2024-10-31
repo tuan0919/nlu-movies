@@ -9,7 +9,6 @@ type MovieDetailsContainerProps = {
 export default function MovieDetailsContainer({children, height} : MovieDetailsContainerProps) {
     return (
     <ScrollView
-      // eslint-disable-next-line react-native/no-inline-styles
       contentContainerStyle={{
         paddingBottom: 40,
         minHeight: height,

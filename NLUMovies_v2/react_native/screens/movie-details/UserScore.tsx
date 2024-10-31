@@ -18,7 +18,7 @@ export default function UserScore({vote_average} : {vote_average : number}) : Re
             >
                 <View>
                     <Text className="text-center text-white font-bold text-base">
-                        {vote_average * 10}%
+                        {(vote_average * 10).toFixed(0)}%
                     </Text>
                 </View>
             </View>

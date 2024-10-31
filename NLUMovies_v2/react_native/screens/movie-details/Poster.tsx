@@ -28,11 +28,11 @@ export default function Poster({posterLink, children} : PosterProps) {
               source={{
                 uri: posterLink,
               }}
-              style={{ width, height: height * 0.55 }}
+              style={{ width, height: height * 0.35 }}
             />
             <LinearGradient
-              colors={['transparent', 'rgba(23,23,23,0.8)', 'rgba(23,23,23,1)']}
-              style={{ width, height: height * 0.4 }}
+              colors={['transparent', 'rgba(0,0,0,0.5)', 'rgba(0,0,0,1)']}
+              style={{ width, height: height * 0.1 }}
               start={{ x: 0.5, y: 0 }}
               end={{ x: 0.5, y: 0.9 }}
               className="absolute bottom-0"
