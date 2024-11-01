@@ -17,7 +17,7 @@ public class NativeS3UploaderPackage extends TurboReactPackage {
     @Nullable
     @Override
     public NativeModule getModule(@NonNull String s, @NonNull ReactApplicationContext reactApplicationContext) {
-        if (s.equals(NativeS3UploaderModule.NAME)) {
+        if (s.equals(MyNativeS3UploadModule.NAME)) {
             return new MyNativeS3UploadModule(reactApplicationContext);
         } else {
             return null;
