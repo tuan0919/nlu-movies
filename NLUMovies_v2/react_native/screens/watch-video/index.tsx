@@ -48,6 +48,18 @@ export default function ViewVideo() {
         setIsPaused(true)
     }
 
+    const handleMute = () => {
+        setIsMuted(!isMuted)
+    }
+
+    const handleExpand = () => {
+        setResizeMode('cover')
+    }
+
+    const handleCompress = () => {
+        setResizeMode('contain')
+    }
+
     const formatDuration = (durationInSeconds: number) => {
         const hours = Math.floor(durationInSeconds / 3600);
         const minutes = Math.floor((durationInSeconds % 3600) / 60);
@@ -70,7 +82,7 @@ export default function ViewVideo() {
             }}
             paused={isPaused}
             muted={isMuted}
-            resizeMode='contain'
+            resizeMode={resizeMode as  "contain" | "none" | "stretch" | "cover" | undefined}
             onLoad={videoInfo => console.log("Video Info:", videoInfo)}
             onBuffer={(bufferValue) => {
                 setIsBuffering(bufferValue.isBuffering)
@@ -137,6 +149,48 @@ export default function ViewVideo() {
                     />
                     <Text style={styles.sliderText}>{formatDuration(progress?.seekableDuration as number)}</Text>
                 </View>
+                {
+                    !isBuffering && (
+                        <View style={[styles.audioSubsIconContainer, {opacity: videoPressed ? 1 : 0}]}>
+                            {
+                                isMuted ? (
+                                    <TouchableOpacity onPress={handleMute}>
+                                        <Image 
+                                        source={require('../../assets/mute.png')} 
+                                        style={{width: 30, height: 30}}/>
+                                    </TouchableOpacity>
+                                ) : (
+                                    <TouchableOpacity onPress={handleMute}>
+                                        <Image 
+                                        source={require('../../assets/audio.png')} 
+                                        style={{width: 30, height: 30}}/>
+                                    </TouchableOpacity>
+                                )
+                            }
+                        </View>
+                    )
+                }
+                {
+                    !isBuffering && (
+                        <View style={[styles.resolutionIconContainer, {opacity: videoPressed ? 1 : 0}]}>
+                            {
+                                resizeMode === 'cover' ? (
+                                    <TouchableOpacity onPress={handleCompress}>
+                                        <Image 
+                                        source={require('../../assets/compress.png')} 
+                                        style={{width: 40, height: 40}}/>
+                                    </TouchableOpacity>
+                                ) : (
+                                    <TouchableOpacity onPress={handleExpand}>
+                                        <Image 
+                                        source={require('../../assets/expand.png')} 
+                                        style={{width: 40, height: 40}}/>
+                                    </TouchableOpacity>
+                                )
+                            }
+                        </View>
+                    )
+                }
             </TouchableOpacity>
         </View>
     )
@@ -179,5 +233,15 @@ const styles = StyleSheet.create({
     sliderText: {
         color: 'white',
         bottom: 40
+    },
+    audioSubsIconContainer: {
+        position: 'absolute',
+        bottom: 30,
+        left: 65
+    },
+    resolutionIconContainer: {
+        position: 'absolute',
+        bottom: 30,
+        right: 65
     }
 })
