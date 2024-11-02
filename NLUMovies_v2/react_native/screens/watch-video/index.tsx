@@ -5,6 +5,7 @@ import Orientation from "react-native-orientation-locker";
 import SystemNavigationBar from "react-native-system-navigation-bar";
 import type { Float } from "react-native/Libraries/Types/CodegenTypes";
 import LottieView from "lottie-react-native";
+import Slider from "@react-native-community/slider";
 
 export default function ViewVideo() {
 
@@ -47,24 +48,36 @@ export default function ViewVideo() {
         setIsPaused(true)
     }
 
+    const formatDuration = (durationInSeconds: number) => {
+        const hours = Math.floor(durationInSeconds / 3600);
+        const minutes = Math.floor((durationInSeconds % 3600) / 60);
+        const seconds = Math.floor(durationInSeconds % 60);
+
+        const formatHours = hours > 0 ? `${hours}:` : '';
+        const formatMinutes = `${minutes < 10 && hours > 0 ? '0' : ''}${minutes}:`;
+        const formatSeconds = `${seconds < 10 ? '0' : ''}${seconds}`;
+
+        return `${formatHours}${formatMinutes}${formatSeconds}`;
+    }
+
     return (
         <View style={styles.container}>
             <StatusBar hidden/>
             <Video
             style={styles.backgroundVideo}
             source={{
-                uri: 'https://vip.opstream14.com/20220619/14926_7dc9f0f7/index.m3u8'
+                uri: 'https://vip.opstream14.com/20220619/14926_7dc9f0f7/index.m3u8',
             }}
             paused={isPaused}
             muted={isMuted}
-            resizeMode='cover'
+            resizeMode='contain'
             onLoad={videoInfo => console.log("Video Info:", videoInfo)}
             onBuffer={(bufferValue) => {
                 setIsBuffering(bufferValue.isBuffering)
             }}
             ref={videoRef as React.LegacyRef<VideoRef>}
             onProgress={progress => {
-                setProgress(progress)
+                setProgress(_ => progress)
             }}
             />
             <TouchableOpacity onPress={() => handleVideoPressed()} 
@@ -108,6 +121,22 @@ export default function ViewVideo() {
                         autoPlay loop/>
                     )
                 }
+                <View style={[styles.sliderContainer, {opacity: videoPressed ? 1 : 0}]}>
+                    <Text style={styles.sliderText}>{formatDuration(progress?.currentTime as number)}</Text>
+                    <Slider
+                    style={styles.sliderProgressBar}
+                    onSlidingComplete={(progress) => {
+                        videoRef.current?.seek(progress)
+                    }}
+                    minimumValue={0}
+                    maximumValue={progress?.seekableDuration}
+                    minimumTrackTintColor="green"
+                    maximumTrackTintColor="white"
+                    thumbTintColor="#28b463"
+                    value={progress?.currentTime}
+                    />
+                    <Text style={styles.sliderText}>{formatDuration(progress?.seekableDuration as number)}</Text>
+                </View>
             </TouchableOpacity>
         </View>
     )
@@ -117,7 +146,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'black',
-        height: 500,
         width: '100%'
     },
     backgroundVideo: {
@@ -131,5 +159,25 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
 
+    },
+    sliderContainer: {
+        width: '90%',
+        height: '25%',
+        position: 'absolute',
+        flexDirection: 'row',
+        bottom: 0,
+        paddingLeft: 20,
+        paddingRight: 20,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    sliderProgressBar: {
+        flex: 1,
+        color: 'red',
+        bottom: 40
+    },
+    sliderText: {
+        color: 'white',
+        bottom: 40
     }
 })
