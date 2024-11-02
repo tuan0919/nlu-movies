@@ -1,23 +1,41 @@
 import React, { useEffect, useState } from "react"
 import { FlatList, Image, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from "react-native"
-import { createThumbnail } from "react-native-create-thumbnail";
 import { PlayCircleIcon } from "react-native-heroicons/outline";
+import type { FilmDetails } from "../../model/apii.online/MovieDetails";
+import type { Season } from "../../model/moviedb/TVSeriesSeason";
+import { fetchImage500 } from "../../api/moviedb";
 
 type Episode = {
     name: string,
-    url: string,
-    thumbnail: string
+    slug: string,
+    filename: string,
+    link_embed: string,
+    link_m3u8: string,
+    ep_name: string,
+    thumbnail: string,
 }
 
-function renderEpisode(episode: Episode) {
+type EpisodeListProps = {
+    filmDetails: FilmDetails,
+    season: Season
+}
+
+function renderEpisode(episode: Episode, thumbnail: string) {
     return (
         <TouchableOpacity style={styles.episode}>
             <Image 
             source={{
-                uri: `${episode.thumbnail}`
+                uri: `${thumbnail}`
             }}
             style={styles.thumbImage}
             />
+            <View style={{position: 'absolute',
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                borderColor: 'rgb(233,233,233)',
+                borderWidth: 2,
+            }}/>
             <PlayCircleIcon 
                 size={35} 
                 strokeWidth={1.1}
@@ -28,23 +46,11 @@ function renderEpisode(episode: Episode) {
     );
 }
 
-async function loadImage(videoLink: string) {
-    try {
-        const response = await createThumbnail({
-            url: videoLink,
-            timeStamp: 2000,
-          });
-        return response.path;
-    } catch (error) {
-        console.error(error)
-    }
-} 
-
 function renderSeperator() {
     return <View style={{width: 15}}/>
 }
 
-export default function EpisodeList() {
+export default function EpisodeList({filmDetails, season} : EpisodeListProps) {
     const [episodes, setEpisodes] = useState<Episode[]>([])
     const [refreshing, setRefreshing] = useState(false); // State cho refreshing
 
@@ -57,13 +63,11 @@ export default function EpisodeList() {
             case "refresh": {
                 console.log('refresh')
                 const epArr : Episode[] = [];
-                const path = await loadImage('https://s5.phim1280.tv/20241028/cCmVbWnx/index.m3u8')
-                console.log('path', path)
-                for (let i = 0; i < 20; i++) {
-                    epArr.push({
-                        name: `${i}`, 
-                        url: 'https://static.vecteezy.com/system/resources/thumbnails/024/646/930/small_2x/ai-generated-stray-cat-in-danger-background-animal-background-photo.jpg',
-                        thumbnail: `${path}`
+                for (let i = 0; i < 5; i++) {
+                    epArr.push({...filmDetails.episodes[0].server_data[i],
+                        thumbnail: fetchImage500(season.episodes[i].still_path),
+                        name: season.episodes[i].episode_number,
+                        ep_name: season.episodes[i].name
                     })
                 }
                 setEpisodes([...epArr])
@@ -72,12 +76,11 @@ export default function EpisodeList() {
             case "load-more": {
                 const size = episodes.length;
                 const epArr = [... episodes]
-                const path = await loadImage('https://vip.opstream11.com/share/d516b13671a4179d9b7b458a6ebdeb92')
                 for (let i = size; i < size + 5; i++) {
-                    epArr.push({
-                        name: `${i}`, 
-                        url: 'https://static.vecteezy.com/system/resources/thumbnails/024/646/930/small_2x/ai-generated-stray-cat-in-danger-background-animal-background-photo.jpg',
-                        thumbnail: `${path}`
+                    epArr.push({...filmDetails.episodes[0].server_data[i],
+                        thumbnail: fetchImage500(season.episodes[i].still_path),
+                        name: season.episodes[i].episode_number,
+                        ep_name: season.episodes[i].name
                     })
                 }
                 setEpisodes([...epArr])
@@ -95,7 +98,7 @@ export default function EpisodeList() {
                 color: 'white',
                 fontWeight: 600
             }}>
-                Tập phim
+                Mùa {season.season_number}
             </Text>
             <View>
                 <FlatList style={styles.episodeList}
@@ -103,7 +106,7 @@ export default function EpisodeList() {
                     ItemSeparatorComponent={renderSeperator}
                     data={episodes}
                     renderItem={({item} : {item: any}) => {
-                        return renderEpisode(item)
+                        return renderEpisode(item, item.thumbnail)
                     }}
                     onEndReachedThreshold={0.3}
                     onEndReached={() => getData("load-more")}
