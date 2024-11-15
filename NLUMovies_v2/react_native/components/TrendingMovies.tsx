@@ -19,7 +19,7 @@ type TrendingMoviesProps = {
   movies: Movie[]
 }
 
-export function TrendingMovies({ movies } : TrendingMoviesProps) {
+export default function TrendingMovies({ movies } : TrendingMoviesProps) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const handleClick = (movie : Movie) => {
     navigation.navigate('Movie', movie);
