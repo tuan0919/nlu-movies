@@ -2,25 +2,24 @@ import React from 'react';
 import { View, ScrollView, Text, TouchableOpacity, type StyleProp, type ViewStyle } from 'react-native';
 import { theme } from '../../theme';
 import { PlayCircleIcon } from 'react-native-heroicons/outline';
-import type { ApiResponse } from '../../api/apii-online';
+import type { MovieDetails } from '../../model/MovieDetails';
 
 type MovieContentProps = {
-    apiResponse: ApiResponse,
+    details: MovieDetails,
     style?: StyleProp<ViewStyle> | undefined,
     className?: string | undefined
 }
 
-export default function MovieContent({apiResponse : response, className, style} : MovieContentProps) {
-  const date = new Date();
+export default function MovieContent({details, className, style} : MovieContentProps) {
   return (
         <View style={style} className={className}>
             <Text className="text-white text-center text-3xl font-bold">
-                {response.movie.name}
+                {details.title}
             </Text>
             <View style={{alignItems: 'flex-start', marginTop: 20}}>
               <Text className="text-neutral-400 font-semibold">
-                  {response.movie.status} •{' '}
-                  {response.movie.created.time} • {response.movie.time}
+                  {details.status} •{' '}
+                  {details.release_date} • {details.runtime} phút
               </Text>
               <ScrollView 
                 horizontal 
@@ -28,7 +27,7 @@ export default function MovieContent({apiResponse : response, className, style} 
                 style={{maxWidth: '100%'}}
               >
                 <View className="flex-row justify-center">
-                  {(response.movie.category || []).map((genre, index, arr) => {
+                  {(details.genres || []).map((genre, index, arr) => {
                     let last = index + 1 !== arr.length;
                     return (
                       <Text
@@ -46,7 +45,7 @@ export default function MovieContent({apiResponse : response, className, style} 
                 </View>
               </ScrollView>
               <Text className="text-neutral-400">
-                {response.movie.content || 'Phim này chưa có mô tả...'}
+                {details.overview || 'Phim này chưa có mô tả...'}
               </Text>
               <TouchableOpacity style={
                 {backgroundColor: 'green', 
