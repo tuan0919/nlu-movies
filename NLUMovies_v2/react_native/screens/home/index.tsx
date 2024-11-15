@@ -4,9 +4,7 @@ import {
 import {
   Bars3CenterLeftIcon,
 } from 'react-native-heroicons/outline';
-import { TrendingMovies } from '../../components/TrendingMovies';
 import { useEffect, useState } from 'react';
-import MovieList from '../../components/MovieList';
 import { useNavigation } from '@react-navigation/native';
 import Loading from '../../components/Loading';
 import React from 'react';
@@ -21,7 +19,8 @@ import HomeHeader from './HomeHeader';
 import HomeBody from './HomeBody';
 import SearchButton from './SearchButton';
 import type { Movie } from '../../model/Movie';
-import { MovieRepository } from '../../repositories/MovieRepository';
+import { MovieRepository } from '../../repositories';
+import { MovieList, TrendingMovies } from '../../components';
 
 export default function HomeScreen() : JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();

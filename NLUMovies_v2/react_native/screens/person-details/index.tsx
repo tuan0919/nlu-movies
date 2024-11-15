@@ -10,14 +10,13 @@ import {
   fetchImage342,
 } from '../../api/moviedb';
 import type { PersonDetails } from '../../model/PersonDetails';
-import { CastRepository } from '../../repositories/CastRepository';
 import type { Movie } from '../../model/Movie';
 import type { RootStackParamList } from '../navigation/navigation';
-import { MovieRepository } from '../../repositories/MovieRepository';
 import PersonAvatar from './PersonAvatar';
 import PersonInfo from './PersonInfo';
 import PersonDetailsHead from './PersonDetailsHead';
 import PersonDetailsContainer from './PersonDetailsContainer';
+import { CastRepository, MovieRepository } from '../../repositories';
 
 var { width, height } = Dimensions.get('window');
 export default function PersonScreen() {

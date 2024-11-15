@@ -12,9 +12,6 @@ import MovieDetailsContainer from './MovieContainer';
 import type { Cast } from '../../model/Cast';
 import type { Movie } from '../../model/Movie';
 import type { RootStackParamList } from '../navigation/navigation';
-import { IMDBRepository } from '../../repositories/imdbRepository';
-import { CastRepository } from '../../repositories/CastRepository';
-import { MovieRepository } from '../../repositories/MovieRepository';
 import UserScore from './UserScore';
 import type { MovieDetails } from '../../model/MovieDetails';
 import { ApplicationException } from '../../exception/AppException';
@@ -23,13 +20,10 @@ import IMDB from './IMDB';
 import MovieContent from './MovieContent';
 import MovieDetailsHead from './MovieDetailsHead';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import EpisodeList from './EpisodesList';
-import { loadDemoMovie } from '../../api/apii-online';
-import type { FilmDetails } from '../../model/apii.online/MovieDetails';
 import type { TVSeriesDetails } from '../../model/moviedb/TVSeriesDetails';
-import { loadSeasonDetails, loadTVSeriesDetails } from '../../api/moviedb';
+import { fetchImage342, loadSeasonDetails, loadTVSeriesDetails } from '../../api/moviedb';
 import type { Season } from '../../model/moviedb/TVSeriesSeason';
-import TabViewExample from './TestTab';
+import {CastRepository, IMDBRepository, MovieRepository} from '../../repositories'
 var { height } = Dimensions.get('window');
 export function MovieScreen() {
   const { params: item } = useRoute<RouteProp<RootStackParamList, 'Movie'>>();
@@ -39,7 +33,6 @@ export function MovieScreen() {
   const [loading, setLoading] = useState<boolean>(false);
   const [movie, setMovie] = useState<MovieDetails | undefined>(undefined);
   const [imdb_score, setImdb_Score] = useState<number>(0);
-  const [filmDetails, setFilmDetails] = useState<FilmDetails>()
   const [tvSeriesDetails, setTvSeriesDetails] = useState<TVSeriesDetails>()
   const [seasons, setSeasons] = useState<Season[]>([])
   useEffect(() => {
@@ -63,11 +56,11 @@ export function MovieScreen() {
       setSimilarMovies(data);
       return data;
     }
-    const loadDemo = async () => {
-      const data = await loadDemoMovie();
-      setFilmDetails(data)
-      return data
-    }
+    // const loadDemo = async () => {
+    //   const data = await loadDemoMovie();
+    //   setFilmDetails(data)
+    //   return data
+    // }
     const getTVSeriesDetails = async (tvId: number) => {
         const data = await loadTVSeriesDetails(tvId);
         setTvSeriesDetails(data)
@@ -79,7 +72,7 @@ export function MovieScreen() {
         setSeasons(ss => [...ss, data])
         console.log('season arr length: ', seasons.length)
         return data;
-      }
+    }
 
     const fetching = async () => {
       try {
@@ -92,13 +85,6 @@ export function MovieScreen() {
               setImdb_Score(score);
             }
           })(),
-          loadDemo()
-            .then(res => getTVSeriesDetails(Number(res.movie.tmdb.id)))
-            .then(tvDetails => {
-              [...tvDetails.seasons]
-                .forEach(season => getSeasonDetails(tvDetails.id, season.season_number))
-            })
-          ,
           loadCreditsMovie(item),
           loadSimilarsMovie(item),
         ]);
@@ -121,10 +107,10 @@ export function MovieScreen() {
     <MovieDetailsContainer height={height}>
       <>
         <MovieDetailsHead>
-        {loading || !filmDetails ? (
+        {loading || !movie ? (
           <Loading />
         ) : (
-          <Poster posterLink={filmDetails.movie.poster_url}>
+          <Poster posterLink={fetchImage342(movie.poster_path) || `https://image.tmdb.org/t/p/w342/${movie.backdrop_path}`}>
             <>
               <UserScore vote_average={movie?.vote_average || 0}/>
               <IMDB imdb_score={imdb_score}/>
@@ -132,12 +118,12 @@ export function MovieScreen() {
           </Poster>
         )}
         </MovieDetailsHead>
-        {!filmDetails || (
+        {!movie || (
           <View className='bg-neutral-950'>
-            <MovieContent apiResponse={filmDetails}/>
-            <>
+            <MovieContent details={movie}/>
+            {/* <>
               {seasons.map(ss => <EpisodeList filmDetails={filmDetails} season={ss}/>)}
-            </>
+            </> */}
             <CastComponent navigation={navigation} cast={cast} />
             {/* Phim cùng thể loại */}
             <MovieList title={'Phim cùng thể loại'} hideSeeAll={true} movies={similarMovies} />
