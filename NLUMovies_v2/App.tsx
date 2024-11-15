@@ -7,6 +7,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import ViewVideo from './react_native/screens/watch-video';
 import { FilmIcon, HomeModernIcon } from 'react-native-heroicons/outline';
 import { Text } from 'react-native';
+import UserProfileScreen from './react_native/screens/profile/UserProfileScreen';
 
 function Home () {
   const Tab = createBottomTabNavigator();
@@ -45,6 +46,7 @@ function Home () {
 export default function App() : React.JSX.Element {
   verifyInstallation();
   return (
-    <Home/>
+    //<Home/>
+    <UserProfileScreen/>
   )
 }
