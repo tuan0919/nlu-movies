@@ -2,7 +2,7 @@ import axios from "axios";
 import type { Cast } from "../model/Cast";
 import type { PersonDetails } from "../model/PersonDetails";
 
-export class CastRepository {
+export default class CastRepository {
     private static API_BASE_URL = "https://api.themoviedb.org/3";
     private static API_KEY = "db55323b8d3e4154498498a75642b381";
 

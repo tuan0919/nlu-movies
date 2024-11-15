@@ -9,7 +9,7 @@ interface imdbResponse {
     },
 }
 
-export class IMDBRepository {
+export default class IMDBRepository {
     async fetchImdbScore(movie_id: string): Promise<number> {
         const options = {
             method: 'GET',
