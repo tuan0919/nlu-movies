@@ -7,7 +7,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
 
-import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
