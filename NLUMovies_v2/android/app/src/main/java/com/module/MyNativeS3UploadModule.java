@@ -7,18 +7,29 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
 
+import com.dto.FileNameRequest;
+import com.dto.PresignedUrlResponse;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.natives3uploader.NativeS3UploaderSpec;
+import com.retrofit.ProgressRequestBody;
+import com.retrofit.RetrofitClient;
+import com.retrofit.UploadService;
 
 import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class MyNativeS3UploadModule extends NativeS3UploaderSpec {
 
     private final ExecutorService executorService;
+    String token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJucWF0MDkxOSIsInNjb3BlIjoiUk9MRV9VU0VSIiwiaXNzIjoiaWRlbnRpdHktc2VydmljZSIsImlkIjoiZWE1MWIzZjYtM2IzNS00OTcyLTgzZTUtNzNjZjk5Mzg1YTYzIiwiZXhwIjoxNzMxOTI3MTg0LCJpYXQiOjE3MzE5MjM1ODQsImp0aSI6IjI3MTEzYzlkLWI2YzctNGFlNi04MjMzLTIxZTA0ZThjOTAwZiJ9.NNVsli9o708p58lqf_MjFi_xSiCek8Y31tT3JsQJs3VyGapM_p96LndBlnYw00RSkeXLvZryFjFUuVkVWOtluA";
 
     public MyNativeS3UploadModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -85,27 +96,12 @@ public class MyNativeS3UploadModule extends NativeS3UploaderSpec {
         }
 
         // Thực thi tác vụ bất đồng bộ với ExecutorService
+        String finalFilePath = filePath;
         executorService.submit(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // Mô phỏng tải tệp lên
-                    simulateFileUpload(fileName, new ProgressCallback() {
-                        @Override
-                        public void onProgress(int progress) {
-                            // Gửi sự kiện về UI thread
-                            sendEvent(progress);
-                        }
-                    });
-
-                    // Sau khi tải xong, resolve promise trên main thread
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            promise.resolve("Upload successful for file: " + fileName);
-                        }
-                    });
-
+                    uploadFile(finalFilePath, fileName, promise);
                 } catch (Exception e) {
                     // Xử lý lỗi và reject promise trên main thread
                     final Exception finalE = e;
@@ -138,5 +134,75 @@ public class MyNativeS3UploadModule extends NativeS3UploaderSpec {
     // Callback interface để nhận tiến độ tải lên
     interface ProgressCallback {
         void onProgress(int progress);
+    }
+
+
+    public void uploadFile(String filePath, String filename, Promise promise) {
+        UploadService uploadService = RetrofitClient.createUploadService();
+
+        // Gửi yêu cầu để lấy presigned URL
+        Call<PresignedUrlResponse> presignedUrlCall =
+                uploadService.getPresignedUrl(token, new FileNameRequest(filename));
+        presignedUrlCall.enqueue(new Callback<PresignedUrlResponse>() {
+            @Override
+            public void onResponse(Call<PresignedUrlResponse> call, Response<PresignedUrlResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getCode() == 1000) {
+                    String presignedUrl = response.body().getResult().getLink();
+                    System.out.println("Presigned URL nhận được: " + presignedUrl);
+
+                    // Upload file đến S3
+                    File file = new File(filePath);
+                    if (!file.exists()) {
+                        promise.reject("File không tồn tại");
+                        System.out.println("File không tồn tại!");
+                        return;
+                    }
+
+                    ProgressRequestBody progressRequestBody = new ProgressRequestBody(
+                            file,
+                            "video/mp4",
+                            (bytesWritten, contentLength) -> {
+                                int progress = (int) ((bytesWritten * 100) / contentLength);
+                                sendEvent(progress);
+                            }
+                    );
+                    Call<ResponseBody> uploadCall = uploadService.uploadFileToS3(presignedUrl, progressRequestBody);
+
+                    uploadCall.enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            if (response.isSuccessful()) {
+                                // Sau khi tải xong, resolve promise trên main thread
+                                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        promise.resolve("Upload successful for file: " + filePath);
+                                    }
+                                });
+                            } else {
+                                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        promise.reject("Something went wrong when uploading file:" +filePath);
+                                    }
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            System.out.println("Lỗi mạng khi upload: " + t.getMessage());
+                        }
+                    });
+                } else {
+                    System.out.println("Lỗi khi lấy presigned URL: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PresignedUrlResponse> call, Throwable t) {
+                System.out.println("Lỗi mạng khi lấy presigned URL: " + t.getMessage());
+            }
+        });
     }
 }
