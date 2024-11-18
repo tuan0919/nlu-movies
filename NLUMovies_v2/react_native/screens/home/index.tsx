@@ -6,21 +6,16 @@ import {
 } from 'react-native-heroicons/outline';
 import { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import Loading from '../../components/Loading';
 import React from 'react';
 import type { RootStackParamList } from '../navigation/navigation';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import {
-  NativeEventEmitter,
-  NativeModules,
-} from 'react-native';
 import { NavLogo } from './NavLogo';
 import HomeHeader from './HomeHeader';
 import HomeBody from './HomeBody';
 import SearchButton from './SearchButton';
 import type { Movie } from '../../model/Movie';
 import { MovieRepository } from '../../repositories';
-import { MovieList, TrendingMovies } from '../../components';
+import { Loading, MovieList, TrendingMovies } from '../../components';
 
 export default function HomeScreen() : JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -34,14 +29,17 @@ export default function HomeScreen() : JSX.Element {
     const loadTrendingMovies = async () => {
       const data = await movieRepository.fetchTrendingMovies();
       setTrending(data);
+      console.log('done load trending movies')
     };
     const loadUpcomingMovies = async () => {
       const data = await movieRepository.fetchUpcomingMovies();
       setUpcoming(data);
+      console.log('done load upcoming movies')
     };
     const loadTopRatedMovies = async () => {
       const data = await movieRepository.fetchTopRatedMovies();
       setTopRated(data);
+      console.log('done load top reated movies')
     };
 
     setLoading(true);
@@ -49,24 +47,12 @@ export default function HomeScreen() : JSX.Element {
       await Promise.all([loadTrendingMovies(), loadUpcomingMovies(), loadTopRatedMovies()]);
       setLoading(false);
     };
-
     fetching();
   };
 
   useEffect(() => {
     startLoading();
   }, []);
-
-  const eventEmitter = new NativeEventEmitter(NativeModules.NativeS3Uploader);
-
-  useEffect(() => {
-    eventEmitter.addListener('updateProgress', (progress: number) => {
-      console.log(progress);
-    });
-    return () => {
-      eventEmitter.removeAllListeners('updateProgress');
-    };
-  });
 
   return (
     <>
@@ -80,7 +66,7 @@ export default function HomeScreen() : JSX.Element {
       </HomeHeader>
       <HomeBody>
         {loading ? (
-            <Loading />
+            <Loading/>
           ) : (
             <>
               {trending.length > 0 && <TrendingMovies movies={trending} />}

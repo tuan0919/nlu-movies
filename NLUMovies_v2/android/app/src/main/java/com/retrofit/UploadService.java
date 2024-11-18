@@ -13,8 +13,8 @@ import retrofit2.http.Url;
 
 public interface UploadService {
     // Gửi yêu cầu để lấy presigned URL
-    @PUT("/api/v1/video-streaming/videos/upload")
-    Call<PresignedUrlResponse> getPresignedUrl(@Body FileNameRequest fileNameRequest);
+    @PUT("http://192.168.1.19:8989/api/v1/video-streaming/videos/upload")
+    Call<PresignedUrlResponse> getPresignedUrl(@Header("Authorization") String bearerToken, @Body FileNameRequest fileNameRequest);
 
     // Upload file đến S3 bằng presigned URL
     @PUT

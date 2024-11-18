@@ -46,7 +46,7 @@ function Home () {
 export default function App() : React.JSX.Element {
   verifyInstallation();
   return (
-    //<Home/>
+    // <Home/>
     <UserProfileScreen/>
   )
 }
