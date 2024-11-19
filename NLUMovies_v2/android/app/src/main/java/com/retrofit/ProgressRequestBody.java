@@ -50,6 +50,12 @@ public class ProgressRequestBody extends RequestBody {
                 if (listener != null) {
                     listener.onProgressUpdate(bytesWritten, totalBytes);
                 }
+
+                try {
+                    Thread.sleep(500);  // Chờ 500ms (có thể điều chỉnh thời gian này)
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();  // Đảm bảo xử lý khi bị ngắt
+                }
             }
         }
     }
