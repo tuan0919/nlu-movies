@@ -114,11 +114,10 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
-    implementation(platform("software.amazon.awssdk:bom:2.27.21"))
-    implementation("software.amazon.awssdk:s3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-    implementation('com.squareup.retrofit2:retrofit:2.4.0')
-    implementation('com.squareup.retrofit2:converter-gson:2.3.0')
+    // Retrofit
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    // Converter Gson cho Retrofit
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {
