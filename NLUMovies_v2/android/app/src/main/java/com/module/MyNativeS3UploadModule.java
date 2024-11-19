@@ -8,6 +8,7 @@ import android.os.Looper;
 import android.provider.MediaStore;
 
 import com.dto.FileNameRequest;
+import com.dto.FileURLResponse;
 import com.dto.PresignedUrlResponse;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -18,6 +19,8 @@ import com.retrofit.RetrofitClient;
 import com.retrofit.UploadService;
 
 import java.io.File;
+import java.net.URLConnection;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -29,7 +32,6 @@ import retrofit2.Response;
 public class MyNativeS3UploadModule extends NativeS3UploaderSpec {
 
     private final ExecutorService executorService;
-    String token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJucWF0MDkxOSIsInNjb3BlIjoiUk9MRV9VU0VSIiwiaXNzIjoiaWRlbnRpdHktc2VydmljZSIsImlkIjoiZWE1MWIzZjYtM2IzNS00OTcyLTgzZTUtNzNjZjk5Mzg1YTYzIiwiZXhwIjoxNzMxOTI3MTg0LCJpYXQiOjE3MzE5MjM1ODQsImp0aSI6IjI3MTEzYzlkLWI2YzctNGFlNi04MjMzLTIxZTA0ZThjOTAwZiJ9.NNVsli9o708p58lqf_MjFi_xSiCek8Y31tT3JsQJs3VyGapM_p96LndBlnYw00RSkeXLvZryFjFUuVkVWOtluA";
 
     public MyNativeS3UploadModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -61,6 +63,12 @@ public class MyNativeS3UploadModule extends NativeS3UploaderSpec {
     }
 
 
+    private void sendEvent(int progress) {
+        getReactApplicationContext()
+            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit("updateProgress", progress);
+    }
+
     @Override
     public void uploadFile(String fileName, Promise promise) {
         if (fileName == null || fileName.isEmpty()) {
@@ -68,26 +76,9 @@ public class MyNativeS3UploadModule extends NativeS3UploaderSpec {
             return;
         }
 
-        Uri fileUri = Uri.parse(fileName);  // URI từ file path
-        String filePath = null;
-
-        // Kiểm tra URI kiểu file://
-        if ("file".equals(fileUri.getScheme())) {
-            filePath = fileUri.getPath();  // Trả về đường dẫn tệp khi là URI kiểu file://
-        } else {
-            // Nếu URI là content://, sử dụng ContentResolver để lấy đường dẫn
-            try {
-                filePath = getRealPathFromURI(getReactApplicationContext(), fileUri);
-            } catch (Exception e) {
-                promise.reject("UPLOAD_ERROR", "Failed to get real path from URI", e);
-                return;
-            }
-        }
-
-        if (filePath == null || filePath.isEmpty()) {
-            promise.reject("UPLOAD_ERROR", "File path is null or empty");
-            return;
-        }
+        Uri fileUri = Uri.parse(fileName);
+        String filePath = resolveFilePath(fileUri, promise);
+        if (filePath == null) return;
 
         File file = new File(filePath);
         if (!file.exists()) {
@@ -95,114 +86,159 @@ public class MyNativeS3UploadModule extends NativeS3UploaderSpec {
             return;
         }
 
-        // Thực thi tác vụ bất đồng bộ với ExecutorService
-        String finalFilePath = filePath;
-        executorService.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    uploadFile(finalFilePath, fileName, promise);
-                } catch (Exception e) {
-                    // Xử lý lỗi và reject promise trên main thread
-                    final Exception finalE = e;
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            promise.reject("UPLOAD_ERROR", finalE);
-                        }
-                    });
+        String ext = getFileExtension(file.getName());
+
+        String key = String.format("temp/nlu-movies/%s%s", UUID.randomUUID().toString(), ext);
+
+        executorService.submit(() -> {
+            try {
+                // Bắt đầu quá trình tải file
+                String presignedUrl = fetchPresignedUrl(key);
+                if (presignedUrl == null) {
+                    promise.reject("UPLOAD_ERROR", "Failed to fetch presigned URL");
+                    return;
                 }
-            }
-        });
-    }
 
-    private void sendEvent(int progress) {
-        getReactApplicationContext()
-            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                .emit("updateProgress", progress);
-    }
-
-    private void simulateFileUpload(String fileName, ProgressCallback callback) throws InterruptedException {
-        for (int progress = 0; progress <= 100; progress += 10) {
-        // Giả lập độ trễ trong quá trình tải
-        Thread.sleep(2000);
-        callback.onProgress(progress);
-    }
-        System.out.println("Upload successful for file: " + fileName);
-    }
-
-    // Callback interface để nhận tiến độ tải lên
-    interface ProgressCallback {
-        void onProgress(int progress);
-    }
-
-
-    public void uploadFile(String filePath, String filename, Promise promise) {
-        UploadService uploadService = RetrofitClient.createUploadService();
-
-        // Gửi yêu cầu để lấy presigned URL
-        Call<PresignedUrlResponse> presignedUrlCall =
-                uploadService.getPresignedUrl(token, new FileNameRequest(filename));
-        presignedUrlCall.enqueue(new Callback<PresignedUrlResponse>() {
-            @Override
-            public void onResponse(Call<PresignedUrlResponse> call, Response<PresignedUrlResponse> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().getCode() == 1000) {
-                    String presignedUrl = response.body().getResult().getLink();
-                    System.out.println("Presigned URL nhận được: " + presignedUrl);
-
-                    // Upload file đến S3
-                    File file = new File(filePath);
-                    if (!file.exists()) {
-                        promise.reject("File không tồn tại");
-                        System.out.println("File không tồn tại!");
-                        return;
+                uploadFileToS3(file, presignedUrl, new UploadCallback() {
+                    @Override
+                    public void onUploadSuccess() {
+                        // Sau khi upload thành công, lấy link file
+                        fetchFileURL(key, new FetchFileURLCallback() {
+                            @Override
+                            public void onSuccess(String fileUrl) {
+                                promise.resolve(fileUrl);
+                            }
+                            @Override
+                            public void onError(String errorMessage) {
+                                promise.reject("FILE_URL_ERROR", "Failed to fetch file URL");
+                            }
+                        });
                     }
 
-                    ProgressRequestBody progressRequestBody = new ProgressRequestBody(
-                            file,
-                            "video/mp4",
-                            (bytesWritten, contentLength) -> {
-                                int progress = (int) ((bytesWritten * 100) / contentLength);
-                                sendEvent(progress);
-                            }
-                    );
-                    Call<ResponseBody> uploadCall = uploadService.uploadFileToS3(presignedUrl, progressRequestBody);
+                    @Override
+                    public void onUploadFailure(String error) {
+                        promise.reject("UPLOAD_ERROR", error);
+                    }
+                });
+            } catch (Exception e) {
+                new Handler(Looper.getMainLooper()).post(() -> promise.reject("UPLOAD_ERROR", e.getMessage()));
+            }
+        });
+    }
 
-                    uploadCall.enqueue(new Callback<ResponseBody>() {
-                        @Override
-                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                            if (response.isSuccessful()) {
-                                // Sau khi tải xong, resolve promise trên main thread
-                                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        promise.resolve("Upload successful for file: " + filePath);
-                                    }
-                                });
-                            } else {
-                                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        promise.reject("Something went wrong when uploading file:" +filePath);
-                                    }
-                                });
-                            }
-                        }
+    private String resolveFilePath(Uri fileUri, Promise promise) {
+        String filePath = null;
 
-                        @Override
-                        public void onFailure(Call<ResponseBody> call, Throwable t) {
-                            System.out.println("Lỗi mạng khi upload: " + t.getMessage());
-                        }
-                    });
+        if ("file".equals(fileUri.getScheme())) {
+            filePath = fileUri.getPath();
+        } else {
+            try {
+                filePath = getRealPathFromURI(getReactApplicationContext(), fileUri);
+            } catch (Exception e) {
+                new Handler(Looper.getMainLooper()).post(() -> promise.reject("UPLOAD_ERROR", "Failed to resolve file path", e));
+            }
+        }
+
+        if (filePath == null || filePath.isEmpty()) {
+            new Handler(Looper.getMainLooper()).post(() -> promise.reject("UPLOAD_ERROR", "File path is null or empty"));
+            return null;
+        }
+
+        return filePath;
+    }
+
+    private String fetchPresignedUrl(String key) throws Exception {
+        UploadService uploadService = RetrofitClient.createUploadService();
+        Call<PresignedUrlResponse> call = uploadService.getPresignedUrl(new FileNameRequest(key));
+        Response<PresignedUrlResponse> response = call.execute();
+
+        if (response.isSuccessful() && response.body() != null && response.body().getCode() == 1000) {
+            return response.body().getResult().getLink();
+        } else {
+            System.err.println("Failed to fetch presigned URL: " + response.code());
+            return null;
+        }
+    }
+
+    private void fetchFileURL(String key, final FetchFileURLCallback callback) {
+        UploadService uploadService = RetrofitClient.createUploadService();
+        Call<FileURLResponse> call = uploadService.getFileURL(key);
+        System.out.println("Key uploaded: " + key);
+
+        call.enqueue(new Callback<FileURLResponse>() {
+            @Override
+            public void onResponse(Call<FileURLResponse> call, Response<FileURLResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    // Lấy file URL từ response và gọi callback với kết quả
+                    String fileUrl = response.body().getResult().getLink();
+                    callback.onSuccess(fileUrl);
                 } else {
-                    System.out.println("Lỗi khi lấy presigned URL: " + response.code());
+                    // Thất bại khi lấy file URL
+                    System.err.println("Failed to fetch file URL: " + response.code());
+                    callback.onError("Failed to fetch file URL: " + response.code());
                 }
             }
 
             @Override
-            public void onFailure(Call<PresignedUrlResponse> call, Throwable t) {
-                System.out.println("Lỗi mạng khi lấy presigned URL: " + t.getMessage());
+            public void onFailure(Call<FileURLResponse> call, Throwable t) {
+                // Lỗi mạng khi gọi API
+                System.err.println("Error fetching file URL: " + t.getMessage());
+                callback.onError("Error fetching file URL: " + t.getMessage());
             }
         });
+    }
+
+    // Callback interface để nhận kết quả
+    public interface FetchFileURLCallback {
+        void onSuccess(String fileUrl);
+        void onError(String errorMessage);
+    }
+
+    private void uploadFileToS3(File file, String presignedUrl, UploadCallback callback) {
+        String contentType = URLConnection.guessContentTypeFromName(file.getName());
+        ProgressRequestBody requestBody = new ProgressRequestBody(
+                file,
+                contentType,
+                (bytesWritten, contentLength) -> {
+                    int progress = (int) ((bytesWritten * 100) / contentLength);
+                    sendEvent(progress);
+                }
+        );
+
+        UploadService uploadService = RetrofitClient.createUploadService();
+        Call<ResponseBody> call = uploadService.uploadFileToS3(presignedUrl, requestBody);
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    callback.onUploadSuccess();
+                } else {
+                    callback.onUploadFailure("Upload failed with code: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                callback.onUploadFailure("Upload failed: " + t.getMessage());
+            }
+        });
+    }
+
+    interface UploadCallback {
+        void onUploadSuccess();
+        void onUploadFailure(String error);
+    }
+
+    public String getFileExtension(String fileName) {
+        if (fileName == null || fileName.isEmpty()) {
+            return ""; // Trả về chuỗi rỗng nếu fileName không hợp lệ
+        }
+
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex > 0 && dotIndex < fileName.length() - 1) {
+            return fileName.substring(dotIndex); // Bao gồm dấu chấm (e.g., ".jpeg")
+        }
+        return ""; // Không có đuôi mở rộng
     }
 }
