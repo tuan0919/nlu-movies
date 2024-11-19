@@ -6,7 +6,7 @@ import { NativeModules } from 'react-native';
 const { MyNativeS3UploadModule } = NativeModules;
 
 const UserProfileScreen = () => {    
-    const [filePath, setFilePath] = useState<string | undefined>(undefined)
+    const [fileSource, setFileSource] = useState<string | undefined>(undefined)
     const [progress, setProgress] = useState(0);
     const [uploading, setUploading] = useState(false);
     useEffect(() => {
@@ -33,13 +33,13 @@ const UserProfileScreen = () => {
             height: 400,
             cropping: true
           }).then(image => {
-            setFilePath(image.path);
             setUploading(true)
             return NativeS3Uploader.uploadFile(image.path)
           })
           .then(response => {
+            console.log('file upload: ', response)
             setUploading(false)
-            console.log(response)
+            setFileSource(response)
           })
           .catch(e => {
             setUploading(false)
@@ -47,17 +47,32 @@ const UserProfileScreen = () => {
         });
     }
     return (
-        <View>
-            {filePath && !uploading && <Image source={{
-                uri: `${filePath}`,
+        <View style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+            gap: 20,
+        }}>
+            {fileSource && !uploading && <Image source={{
+                uri: `${fileSource}`,
             }}
             style={{
-                width: 400,
+                width: 300,
                 height: 400,
             }}
             />}
-            <Button onPress={handleChooseImage} title="Click me"/>
-            {uploading && <Text>Uploading... {progress}%</Text>}  {/* Hiển thị tiến độ */}
+            <Button onPress={handleChooseImage} title="Upload image to S3"/>
+            {uploading && (
+                <View style={{
+                    justifyContent: 'center',
+                    alignContent: 'center',
+                    gap: 10,
+                }}>
+                    <Text>Uploading</Text>
+                    <Text style={{fontSize: 24, fontWeight: 'bold', color: 'green'}}>{progress}%</Text>
+                </View>
+            )}
         </View>
     )
 }
