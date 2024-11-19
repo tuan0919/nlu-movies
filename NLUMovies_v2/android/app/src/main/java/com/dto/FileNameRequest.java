@@ -1,13 +1,13 @@
 package com.dto;
 
 public class FileNameRequest {
-    private String filename;
+    private String fileKey;
 
-    public FileNameRequest(String filename) {
-        this.filename = filename;
+    public FileNameRequest(String fileKey) {
+        this.fileKey = fileKey;
     }
 
-    public String getFilename() {
-        return filename;
+    public String getFileKey() {
+        return fileKey;
     }
 }
