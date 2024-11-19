@@ -5,7 +5,7 @@ import type { MovieDetails } from '../model/MovieDetails';
 import { ApplicationException } from '../exception/AppException';
 
 export default class MovieRepository {
-    private static API_KEY = 'db55323b8d3e4154498498a75642b381';
+    private static API_KEY = '37df322bb560e972279975a695090370';
     private static apiBaseURL = 'https://api.themoviedb.org/3';
 
     private _movieSimilars = (id: string) =>
@@ -26,6 +26,7 @@ export default class MovieRepository {
         try {
             return axios.request<T>(options).then(value => value.data);
         } catch (error) {
+            console.error(`Lỗi khi fetch: ${endpoint}`)
             throw new ApplicationException({
                 message: `Lỗi khi fetch: ${endpoint}`,
                 code: 999,

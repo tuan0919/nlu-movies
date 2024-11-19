@@ -118,7 +118,7 @@ export function MovieScreen() {
           </Poster>
         )}
         </MovieDetailsHead>
-        {!movie || (
+        {!loading && movie && (
           <View className='bg-neutral-950'>
             <MovieContent details={movie}/>
             {/* <>
